@@ -2,13 +2,18 @@
   "name": "vrdu-graph",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://YOUR_GITHUB_USERNAME.github.io/vrdu-graph",
-  "dependencies": {
-    "d3": "^7.9.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1"
+  "description": "",
+  "homepage": ".",
+  "bugs": {
+    "url": "https://github.com/LeweiXu/Multi-Page-VRDU/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeweiXu/Multi-Page-VRDU.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -16,11 +21,25 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1"
+  },
   "devDependencies": {
     "gh-pages": "^6.0.0"
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

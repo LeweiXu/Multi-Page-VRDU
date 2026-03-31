@@ -1,78 +1,80 @@
 /**
  * colours.js
- * Maps node `type` strings to CSS variable names and hex values.
+ * Dynamic category -> color mapping derived from CSV categories.
  */
 
-// CSS variable names defined in global.css
-export const TYPE_VAR_MAP = {
-  // Tier 0-1 foundations
-  'Foundation Architecture':           '--cat-foundation-nlp',
-  'Pretrained Language Model':         '--cat-foundation-nlp',
-  'Open-Weight Large Language Model':  '--cat-foundation-nlp',
-  'Dense Retrieval Model':             '--cat-retrieval',
-  'Retrieval Algorithm':               '--cat-retrieval',
-  'Retrieval-Augmented Generation Framework': '--cat-retrieval',
+const DEFAULT_COLOR = '#5a6a8a';
+const colorCache = new Map();
 
-  // Vision
-  'Vision Foundation Model':           '--cat-foundation-vision',
-  'Document Vision Foundation Model':  '--cat-foundation-vision',
-  'Visual Document Retrieval Model':   '--cat-foundation-vision',
-
-  // VLM / Multimodal
-  'Vision-Language Model':             '--cat-vlm',
-  'Multimodal Large Language Model':   '--cat-vlm',
-  'Multimodal Document Pre-trained Model': '--cat-vlm',
-
-  // Agents & prompting
-  'Agentic Prompting Framework':       '--cat-agent',
-  'Prompting Framework':               '--cat-agent',
-
-  // PEFT / components
-  'Parameter-Efficient Fine-Tuning (PEFT) Method': '--cat-peft',
-  'Architectural Component / Connector': '--cat-peft',
-
-  // Tools / parsing
-  'Document Parsing Pipeline':         '--cat-tool',
-  'Document Layout Analysis Dataset':  '--cat-tool',
-
-  // Target models
-  'Multi-Page DocVQA Model':           '--cat-docvqa',
-};
-
-// Hex fallback palette (must match CSS vars above)
-export const TYPE_HEX_MAP = {
-  '--cat-foundation-nlp':    '#e07b5a',
-  '--cat-foundation-vision': '#5a8fe0',
-  '--cat-vlm':               '#b87de8',
-  '--cat-retrieval':         '#5ac8a0',
-  '--cat-agent':             '#e8c45a',
-  '--cat-peft':              '#e87a5a',
-  '--cat-dataset':           '#7a8fb0',
-  '--cat-tool':              '#60b8b0',
-  '--cat-docvqa':            '#e05a8f',
-  '--cat-default':           '#5a6a8a',
-};
-
-export function getCSSVar(type) {
-  return TYPE_VAR_MAP[type] || '--cat-default';
+function normaliseCategory(category) {
+  return String(category || '').trim();
 }
 
-export function getHex(type) {
-  const varName = getCSSVar(type);
-  return TYPE_HEX_MAP[varName] || TYPE_HEX_MAP['--cat-default'];
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
 }
 
-// Distinct groups for the legend
-export const LEGEND_ENTRIES = [
-  { label: 'NLP Foundation',    varName: '--cat-foundation-nlp' },
-  { label: 'Vision Foundation', varName: '--cat-foundation-vision' },
-  { label: 'VLM / Multimodal', varName: '--cat-vlm' },
-  { label: 'Retrieval / RAG',   varName: '--cat-retrieval' },
-  { label: 'Agentic / Prompting', varName: '--cat-agent' },
-  { label: 'PEFT / Component',  varName: '--cat-peft' },
-  { label: 'Tool / Parser',     varName: '--cat-tool' },
-  { label: 'DocVQA Model',      varName: '--cat-docvqa' },
-];
+function hslToHex(h, s, l) {
+  const sat = s / 100;
+  const light = l / 100;
+  const c = (1 - Math.abs((2 * light) - 1)) * sat;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = light - (c / 2);
+
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h < 300) {
+    r = x; g = 0; b = c;
+  } else {
+    r = c; g = 0; b = x;
+  }
+
+  const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function generateColor(category) {
+  const hash = hashString(category);
+  const hue = hash % 360;
+  const sat = 62;
+  const light = 58;
+  return hslToHex(hue, sat, light);
+}
+
+export function getHex(category) {
+  const key = normaliseCategory(category);
+  if (!key) return DEFAULT_COLOR;
+  if (colorCache.has(key)) return colorCache.get(key);
+
+  const color = generateColor(key);
+  colorCache.set(key, color);
+  return color;
+}
+
+export function getLegendEntries(categories) {
+  return (categories || [])
+    .map(normaliseCategory)
+    .filter(Boolean)
+    .map(label => ({
+      label,
+      color: getHex(label),
+    }));
+}
 
 export const YEAR_MAP = {
   'BM25': 1994, 'Transformer': 2017, 'BERT': 2018, 'ViT': 2020,

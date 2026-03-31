@@ -86,21 +86,22 @@ export async function loadNodes() {
       name:        n['Name'],
       deps:        parseDeps(n['Dependencies']),
       rels:        parseRels(n['Relationship']),
-      type:        n['Type'] || '',
+      // CSV schema uses Category; keep Type as fallback for compatibility.
+      type:        n['Category'] || n['Type'] || '',
       description: n['Description'] || '',
       technique:   n['Key Technique'] || '',
       architecture:n['Architecture'] || '',
       objective:   n['(Pre)-training Objective'] || '',
-      bibtex:      n['BibTex (Needs Checking)'] || '',
+      bibtex:      n['BibTex (Unverified)'] || n['BibTex (Needs Checking)'] || '',
     }));
 }
 
 function parseDeps(str) {
-  if (!str || str === 'N/A') return [];
+  if (!str || str === 'N/A' || str === 'None') return [];
   return str.split(';').map(s => s.trim()).filter(Boolean);
 }
 
 function parseRels(str) {
-  if (!str || str === 'N/A') return [];
+  if (!str || str === 'N/A' || str === 'None') return [];
   return str.split(';').map(s => s.trim()).filter(Boolean);
 }

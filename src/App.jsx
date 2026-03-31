@@ -85,7 +85,7 @@ export default function App() {
         />
       )}
 
-      <Legend />
+      <Legend categories={allTypes} />
     </div>
   );
 }

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VRDU Dependency Tree</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #07090f;
+  --bg2:      #0e1119;
+  --bg3:      #141824;
+  --surface:  #1a2030;
+  --surface2: #212840;
+  --border:   #263050;
+  --border2:  #334070;
+  --text:     #dde4f5;
+  --text2:    #7d90b8;
+  --text3:    #4a5878;
+  --accent:   #4f9cf9;
+  --ph: 56px;
+  --pw: 400px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;}
+
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--ph);
+  display:flex;align-items:center;gap:14px;padding:0 20px;
+  background:var(--bg2);border-bottom:1px solid var(--border);z-index:100;
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:.06em;white-space:nowrap;}
+.logo em{color:var(--accent);font-style:normal;}
+.sep{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+
+.upload-btn{
+  display:flex;align-items:center;gap:8px;padding:5px 12px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:5px;
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.upload-btn:hover{border-color:var(--accent);color:var(--text);}
+.upload-btn input{display:none;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s;}
+.sdot.ok{background:#4eca8b;}
+.sdot.spin{background:#f0a030;animation:pulse .8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.sw{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:1px solid var(--border);border-radius:5px;
+  padding:0 10px;flex:1;max-width:260px;
+}
+.sw svg{opacity:.35;flex-shrink:0;}
+#si{
+  background:transparent;border:none;outline:none;
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--text);
+  width:100%;padding:6px 0;
+}
+#si::placeholder{color:var(--text3);}
+
+.fr{display:flex;align-items:center;gap:5px;overflow-x:auto;}
+.fr::-webkit-scrollbar{display:none;}
+.fb{
+  font-family:'DM Mono',monospace;font-size:9px;padding:4px 9px;
+  border-radius:3px;border:1px solid var(--border);background:transparent;
+  color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;
+}
+.fb:hover{border-color:var(--border2);color:var(--text2);}
+.fb.on{background:var(--surface);border-color:var(--border2);color:var(--text);}
+
+.hint{font-size:9px;color:var(--text3);white-space:nowrap;margin-left:auto;}
+
+#canvas{position:fixed;top:var(--ph);left:0;width:100%;height:calc(100% - var(--ph));overflow:hidden;}
+svg#tree{width:100%;height:100%;cursor:grab;}
+svg#tree:active{cursor:grabbing;}
+
+.tier-stripe{opacity:1;}
+.tier-lbl{
+  font-family:'Syne',sans-serif;font-size:9.5px;font-weight:700;
+  fill:var(--text3);letter-spacing:.1em;dominant-baseline:middle;
+}
+
+.lnk{fill:none;stroke:#334070;stroke-width:1.2px;opacity:.5;transition:opacity .25s,stroke .25s;}
+.lnk.hi{stroke:#4f9cf9;opacity:1;stroke-width:2px;}
+.lnk.dm{opacity:.05;}
+
+.nd{cursor:pointer;}
+.nd:hover .nb{filter:brightness(1.3);}
+.nd.sel .nb{stroke-width:2px;filter:brightness(1.4);}
+.nd.dm .nb,.nd.dm .nl,.nd.dm .ny{opacity:.1;}
+.nd.smatch .nb{stroke-width:2.5px;filter:brightness(1.6);}
+.nd.sdim .nb,.nd.sdim .nl,.nd.sdim .ny{opacity:.08;}
+
+.nb{rx:6px;ry:6px;stroke-width:1px;transition:filter .15s,opacity .25s;}
+.nrng{fill:none;stroke-width:1.5px;opacity:0;transition:opacity .2s;}
+.nd:hover .nrng,.nd.sel .nrng{opacity:.7;}
+
+.nl{
+  font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;
+  fill:rgba(255,255,255,.88);pointer-events:none;
+  dominant-baseline:middle;text-anchor:middle;
+}
+.ny{
+  font-family:'DM Mono',monospace;font-size:8px;
+  fill:rgba(255,255,255,.38);pointer-events:none;
+  dominant-baseline:middle;text-anchor:middle;
+}
+
+#panel{
+  position:fixed;top:var(--ph);right:0;width:var(--pw);height:calc(100% - var(--ph));
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:50;
+}
+#panel.open{transform:translateX(0);}
+
+.phead{padding:18px 18px 13px;border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
+.pbadge{
+  font-size:8px;letter-spacing:.13em;text-transform:uppercase;
+  font-family:'Syne',sans-serif;font-weight:700;
+  padding:3px 8px;border-radius:3px;display:inline-block;margin-bottom:9px;
+}
+.pname{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;line-height:1.3;margin-bottom:5px;}
+.pmeta{font-size:9px;color:var(--text3);display:flex;gap:12px;}
+.pcls{
+  position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:4px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text2);
+  cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.pcls:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+
+.pbody{flex:1;overflow-y:auto;padding:14px 18px 24px;}
+.pbody::-webkit-scrollbar{width:3px;}
+.pbody::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+.fld{margin-bottom:16px;}
+.flb{
+  font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);
+  font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;
+}
+.flb::after{content:'';flex:1;height:1px;background:var(--border);}
+.fv{font-size:11px;color:var(--text2);line-height:1.65;}
+.fv.mono{font-size:10px;color:var(--text3);}
+.chip{
+  display:inline-block;font-size:8.5px;padding:2px 7px;border-radius:3px;
+  margin:2px 3px 2px 0;background:var(--surface);border:1px solid var(--border2);
+  color:var(--text2);cursor:pointer;transition:all .15s;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+
+#leg{
+  position:fixed;bottom:14px;left:14px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+  padding:10px 13px;z-index:40;
+}
+.lgt{font-family:'Syne',sans-serif;font-weight:700;font-size:8px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+.lgr{display:flex;align-items:center;gap:7px;margin-bottom:3px;font-size:9px;color:var(--text3);cursor:pointer;transition:color .15s;}
+.lgr:hover{color:var(--text2);}
+.lgd{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+
+#zc{position:fixed;bottom:14px;right:14px;display:flex;flex-direction:column;gap:4px;z-index:40;}
+.zb{width:30px;height:30px;border-radius:4px;background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:15px;font-family:monospace;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.zb:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+
+#es{
+  position:fixed;top:var(--ph);left:0;right:0;bottom:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;
+}
+.es-h{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--text3);}
+.es-s{font-size:10px;color:var(--text3);text-align:center;max-width:420px;line-height:1.65;}
+
+#dov{
+  position:fixed;inset:0;z-index:200;background:rgba(7,9,15,.93);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  border:2px dashed var(--border2);margin:20px;border-radius:10px;
+}
+#dov.vis{display:flex;}
+#dov p{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text2);}
+#dov small{font-size:10px;color:var(--text3);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">VRDU <em>TREE</em></div>
+  <div class="sep"></div>
+  <label class="upload-btn" id="upLabel">
+    <div class="sdot" id="sdot"></div>
+    <span id="upTxt">Load CSV</span>
+    <input type="file" id="csvFile" accept=".csv">
+  </label>
+  <div class="sw">
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="9.5" y1="9.5" x2="13" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <input id="si" placeholder="Search nodes…" autocomplete="off">
+  </div>
+  <div class="fr" id="fr">
+    <button class="fb on" data-cat="all">All</button>
+  </div>
+  <span class="hint">scroll · pan · drag nodes · click for details</span>
+</header>
+
+<div id="canvas">
+  <svg id="tree">
+    <defs>
+      <marker id="arr"   markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+        <polygon points="0 0,7 2.5,0 5" fill="rgba(51,68,120,.85)"/>
+      </marker>
+      <marker id="arrhi" markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+        <polygon points="0 0,7 2.5,0 5" fill="#4f9cf9"/>
+      </marker>
+    </defs>
+    <g id="root"></g>
+  </svg>
+</div>
+
+<div id="es">
+  <div class="es-h">No data loaded</div>
+  <div class="es-s">Place <code>vrdu_dependencies.csv</code> in the same folder as this file — it will load automatically.<br>Or drag &amp; drop / use the Load CSV button.</div>
+</div>
+
+<div id="panel">
+  <div class="phead">
+    <button class="pcls" id="pcls">✕</button>
+    <div class="pbadge" id="pb"></div>
+    <div class="pname"  id="pn"></div>
+    <div class="pmeta"><span id="py"></span><span id="pt"></span></div>
+  </div>
+  <div class="pbody">
+    <div class="fld"><div class="flb">Dependencies</div><div class="fv" id="pd"></div></div>
+    <div class="fld"><div class="flb">Description / Role</div><div class="fv" id="pds"></div></div>
+    <div class="fld"><div class="flb">Key Technique</div><div class="fv" id="ptk"></div></div>
+    <div class="fld"><div class="flb">Architecture</div><div class="fv" id="pa"></div></div>
+    <div class="fld"><div class="flb">Training Objective</div><div class="fv" id="pto"></div></div>
+    <div class="fld"><div class="flb">BibTeX key</div><div class="fv mono" id="pbib"></div></div>
+  </div>
+</div>
+
+<div id="leg"><div class="lgt">Category</div><div id="lgi"></div></div>
+<div id="zc">
+  <button class="zb" id="zi">+</button>
+  <button class="zb" id="zf">⌂</button>
+  <button class="zb" id="zo">−</button>
+</div>
+<div id="dov"><p>Drop CSV here</p><small>vrdu_dependencies.csv</small></div>
+
+<script>
+// ── year lookup (CSV has no Year column) ──────────────────────────────────
+const YR = {
+  'BM25':1994,'Transformer':2017,'BERT':2018,'ViT':2020,'T5':2019,
+  'DiT (Document Image Transformer)':2022,'BEiT':2021,
+  'ColBERT':2020,'CLIP':2021,'Pix2Struct':2022,'SigLIP-SO400m':2023,
+  'DPR':2020,'LLaMA 3':2024,'LayoutLMv3':2022,'LLaVA':2023,
+  'RAG':2020,'ColPali':2024,'InternViT-6B':2024,'Qwen2-VL':2024,
+  'InternVL2':2024,'PaliGemma':2024,'DocFormerv2':2023,
+  'CoT (Chain-of-Thought)':2022,'MinerU':2024,'DocLayNet':2022,
+  'Adapter (Houlsby 2019)':2019,'MLP Projector':2023,'LoRA':2021,'ReAct':2022,
+};
+
+// ── colour palette ────────────────────────────────────────────────────────
+const CC = {
+  'foundation architecture':'#e0855a',
+  'pretrained language model':'#e07b5a',
+  'open-weight large language model':'#d4956a',
+  'vision foundation model':'#5a90e0',
+  'document vision foundation model':'#4a80d0',
+  'vision-language model':'#9a7be8',
+  'multimodal large language model':'#c07fe8',
+  'multimodal document pre-trained model':'#b070d8',
+  'dense retrieval model':'#5ac8a0',
+  'retrieval algorithm':'#4ab890',
+  'retrieval-augmented generation framework':'#4ab898',
+  'visual document retrieval model':'#3aa888',
+  'prompting framework':'#e8c45a',
+  'agentic prompting framework':'#d8b44a',
+  'parameter-efficient fine-tuning (peft) method':'#e87a5a',
+  'architectural component / connector':'#e89a5a',
+  'document layout analysis dataset':'#8090b8',
+  'document parsing pipeline':'#60b0b0',
+};
+function gc(cat){
+  if(!cat) return '#5a6a8a';
+  const k=cat.toLowerCase().trim();
+  if(CC[k]) return CC[k];
+  for(const [key,val] of Object.entries(CC))
+    if(k.includes(key)||key.includes(k)) return val;
+  return '#5a6a8a';
+}
+
+// ── CSV parser ────────────────────────────────────────────────────────────
+function parseCSV(txt){
+  const lines=txt.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const hdr=splitL(lines[0]);
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const vs=splitL(lines[i]);
+    const o={};
+    hdr.forEach((h,j)=>{ o[h.trim()]=(vs[j]||'').trim(); });
+    if(g(o,'Name')) rows.push(o);
+  }
+  return rows;
+}
+function splitL(s){
+  const r=[]; let c='',q=false;
+  for(let i=0;i<s.length;i++){
+    if(s[i]==='"'){if(q&&s[i+1]==='"'){c+='"';i++;}else q=!q;}
+    else if(s[i]===','&&!q){r.push(c);c='';}
+    else c+=s[i];
+  }
+  r.push(c); return r;
+}
+function g(o,...ns){
+  for(const n of ns)
+    for(const k of Object.keys(o))
+      if(k.toLowerCase().replace(/[^a-z0-9]/g,'')=== n.toLowerCase().replace(/[^a-z0-9]/g,''))
+        return o[k]||'';
+  return '';
+}
+
+// ── state ─────────────────────────────────────────────────────────────────
+let nodes=[], links=[], byId=new Map();
+let zoomB, svgEl, gRoot;
+let W=window.innerWidth, H=window.innerHeight-56;
+
+const TIER_H = 130;  // px between tier rows
+const TOP_PAD = 75;  // first row y
+const LBL_X  = 28;  // tier label x
+
+// ── node dimensions ───────────────────────────────────────────────────────
+function nw(n){ return Math.max(105, Math.min(185, n.id.length*7+24)); }
+const NH = 42;
+
+function trunc(s,w){ const m=Math.floor((w-18)/6.3); return s.length>m?s.slice(0,m-1)+'…':s; }
+function san(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+
+// ── build data ────────────────────────────────────────────────────────────
+function buildData(rows){
+  nodes=rows.map(r=>({
+    id:   g(r,'Name','name'),
+    tier: parseInt(g(r,'Tier','tier'))||0,
+    cat:  g(r,'Type','Category','category','type'),
+    deps: g(r,'Dependencies','dependencies'),
+    rels: g(r,'Relationship','Relationships','relationship'),
+    desc: g(r,'Description','description'),
+    tech: g(r,'KeyTechnique','keytechnique','Key Technique'),
+    arch: g(r,'Architecture','architecture'),
+    train:g(r,'PretrainingObjective','(Pre)-training Objective','Training Objective'),
+    bib:  g(r,'BibTex','bibtex','BibTeX','BibTex (Needs Checking)'),
+    year: YR[g(r,'Name','name')]||null,
+    x:0,y:0,
+  })).filter(n=>n.id);
+
+  byId=new Map(nodes.map(n=>[n.id.toLowerCase(),n]));
+
+  links=[];
+  nodes.forEach(n=>{
+    if(!n.deps||n.deps==='N/A') return;
+    n.deps.split(';').map(s=>s.trim()).filter(s=>s&&s!=='N/A').forEach(dep=>{
+      const src=byId.get(dep.toLowerCase());
+      if(src) links.push({source:src.id,target:n.id});
+    });
+  });
+}
+
+// ── layout: tier rows, horizontal spread ──────────────────────────────────
+function layout(){
+  const tg={};
+  nodes.forEach(n=>{ if(!tg[n.tier])tg[n.tier]=[]; tg[n.tier].push(n); });
+  const tiers=Object.keys(tg).map(Number).sort((a,b)=>a-b);
+  tiers.forEach((t,ti)=>{
+    const grp=tg[t];
+    const usableW=W-80;
+    const step=usableW/(grp.length+1);
+    grp.forEach((n,ni)=>{
+      n.x=40+step*(ni+1);
+      n.y=TOP_PAD+ti*TIER_H;
+    });
+  });
+}
+
+// ── render ────────────────────────────────────────────────────────────────
+function render(rows){
+  buildData(rows);
+  layout();
+
+  document.getElementById('es').style.display='none';
+  buildLegend();
+  buildFilters();
+
+  svgEl=d3.select('#tree');
+  gRoot=d3.select('#root');
+  gRoot.selectAll('*').remove();
+
+  // tier band + label
+  const tg={};
+  nodes.forEach(n=>{ if(!tg[n.tier])tg[n.tier]=[]; tg[n.tier].push(n); });
+  const tiers=Object.keys(tg).map(Number).sort((a,b)=>a-b);
+
+  const sg=gRoot.append('g');
+  tiers.forEach((t,ti)=>{
+    const cy=TOP_PAD+ti*TIER_H;
+    sg.append('rect').attr('class','tier-stripe')
+      .attr('x',-6000).attr('y',cy-TIER_H*.44).attr('width',12000).attr('height',TIER_H)
+      .attr('fill',ti%2===0?'rgba(255,255,255,0)':'rgba(0,0,0,.18)');
+    sg.append('text').attr('class','tier-lbl')
+      .attr('x',LBL_X).attr('y',cy)
+      .text(`T${t}`);
+  });
+
+  // links
+  const lg=gRoot.append('g');
+  const lkSel=lg.selectAll('path.lnk').data(links).enter()
+    .append('path').attr('class','lnk')
+    .attr('marker-end','url(#arr)')
+    .attr('d',lp);
+
+  // nodes
+  const ng=gRoot.append('g');
+  const ndSel=ng.selectAll('g.nd').data(nodes).enter()
+    .append('g').attr('class','nd')
+    .attr('id',d=>'n_'+san(d.id))
+    .attr('transform',d=>`translate(${d.x},${d.y})`)
+    .call(d3.drag()
+      .on('start',(_,d)=>{ d3.select('#n_'+san(d.id)).raise(); })
+      .on('drag',(ev,d)=>{
+        d.x=ev.x; d.y=ev.y;
+        d3.select('#n_'+san(d.id)).attr('transform',`translate(${d.x},${d.y})`);
+        gRoot.selectAll('path.lnk').attr('d',lp);
+      }))
+    .on('click',(ev,d)=>{ ev.stopPropagation(); pick(d); });
+
+  // ring
+  ndSel.append('rect').attr('class','nrng')
+    .attr('x',d=>-nw(d)/2-4).attr('y',-NH/2-4)
+    .attr('width',d=>nw(d)+8).attr('height',NH+8).attr('rx',10)
+    .attr('stroke',d=>gc(d.cat));
+
+  // body
+  ndSel.append('rect').attr('class','nb')
+    .attr('x',d=>-nw(d)/2).attr('y',-NH/2)
+    .attr('width',d=>nw(d)).attr('height',NH)
+    .attr('fill',d=>gc(d.cat)+'1c')
+    .attr('stroke',d=>gc(d.cat));
+
+  // name
+  ndSel.append('text').attr('class','nl')
+    .attr('y',d=>d.year?-6:0)
+    .text(d=>trunc(d.id,nw(d)));
+
+  // year
+  ndSel.append('text').attr('class','ny').attr('y',8)
+    .text(d=>d.year||'');
+
+  // zoom
+  zoomB=d3.zoom().scaleExtent([.06,4])
+    .on('zoom',e=>gRoot.attr('transform',e.transform));
+  svgEl.call(zoomB);
+  svgEl.on('click',()=>desel());
+
+  // entrance
+  ndSel.style('opacity',0).transition().duration(450)
+    .delay((_,i)=>i*20).style('opacity',1);
+  lkSel.style('opacity',0).transition().duration(400)
+    .delay(nodes.length*12).style('opacity',.5);
+
+  setTimeout(fit,100);
+}
+
+// curved path from source bottom centre → target top centre
+function lp(d){
+  const s=byId.get((typeof d.source==='object'?d.source.id:d.source).toLowerCase());
+  const t=byId.get((typeof d.target==='object'?d.target.id:d.target).toLowerCase());
+  if(!s||!t) return '';
+  const x1=s.x, y1=s.y+NH/2+1;
+  const x2=t.x, y2=t.y-NH/2-6;
+  const my=(y1+y2)/2;
+  return `M${x1},${y1}C${x1},${my} ${x2},${my} ${x2},${y2}`;
+}
+
+// ── select / deselect ─────────────────────────────────────────────────────
+function pick(d){
+  const conn=new Set([d.id]);
+  links.forEach(l=>{
+    const s=typeof l.source==='object'?l.source.id:l.source;
+    const t=typeof l.target==='object'?l.target.id:l.target;
+    if(s===d.id||t===d.id){conn.add(s);conn.add(t);}
+  });
+  d3.selectAll('.nd').classed('sel',n=>n.id===d.id).classed('dm',n=>!conn.has(n.id));
+  d3.selectAll('.lnk').each(function(l){
+    const s=typeof l.source==='object'?l.source.id:l.source;
+    const t=typeof l.target==='object'?l.target.id:l.target;
+    const h=s===d.id||t===d.id;
+    d3.select(this).classed('hi',h).classed('dm',!h)
+      .attr('marker-end',h?'url(#arrhi)':'url(#arr)');
+  });
+  panel(d);
+}
+function desel(){
+  d3.selectAll('.nd').classed('sel',false).classed('dm',false);
+  d3.selectAll('.lnk').classed('hi',false).classed('dm',false)
+    .attr('marker-end','url(#arr)');
+  document.getElementById('panel').classList.remove('open');
+}
+
+// ── panel ─────────────────────────────────────────────────────────────────
+function panel(d){
+  const c=gc(d.cat);
+  const b=document.getElementById('pb');
+  b.textContent=d.cat||'Unknown';
+  b.style.cssText=`background:${c}22;color:${c};border:1px solid ${c}55;`;
+  document.getElementById('pn').textContent=d.id;
+  document.getElementById('py').textContent=d.year?`Year: ${d.year}`:'';
+  document.getElementById('pt').textContent=`Tier: ${d.tier}`;
+
+  const de=document.getElementById('pd'); de.innerHTML='';
+  if(d.deps&&d.deps!=='N/A'){
+    const ds=d.deps.split(';').map(s=>s.trim()).filter(Boolean);
+    const rs=d.rels?d.rels.split(';').map(s=>s.trim()):[];
+    ds.forEach((dep,i)=>{
+      const ch=document.createElement('span');
+      ch.className='chip';
+      ch.textContent=dep+(rs[i]?` (${rs[i]})`:'');
+      ch.onclick=()=>{ const t=byId.get(dep.toLowerCase()); if(t) pick(t); };
+      de.appendChild(ch);
+    });
+  } else de.innerHTML='<span style="color:var(--text3)">None</span>';
+
+  document.getElementById('pds').textContent=d.desc||'—';
+  document.getElementById('ptk').textContent=d.tech||'—';
+  document.getElementById('pa').textContent=d.arch||'—';
+  document.getElementById('pto').textContent=d.train||'—';
+  document.getElementById('pbib').textContent=d.bib||'—';
+  document.getElementById('panel').classList.add('open');
+}
+document.getElementById('pcls').onclick=desel;
+
+// ── search ────────────────────────────────────────────────────────────────
+document.getElementById('si').addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  if(!q){
+    d3.selectAll('.nd').classed('smatch',false).classed('sdim',false);
+    return;
+  }
+  d3.selectAll('.nd').each(function(d){
+    const hit=d.id.toLowerCase().includes(q)||d.cat.toLowerCase().includes(q)
+      ||(d.year&&String(d.year).includes(q))||d.desc.toLowerCase().includes(q)
+      ||d.tech.toLowerCase().includes(q);
+    d3.select(this).classed('smatch',hit).classed('sdim',!hit);
+  });
+});
+
+// ── filters ───────────────────────────────────────────────────────────────
+function buildFilters(){
+  const cats=[...new Set(nodes.map(n=>n.cat).filter(Boolean))];
+  const fr=document.getElementById('fr'); fr.innerHTML='';
+  const ab=document.createElement('button');
+  ab.className='fb on';ab.dataset.cat='all';ab.textContent='All';
+  ab.onclick=()=>applyF('all'); fr.appendChild(ab);
+  cats.forEach(cat=>{
+    const b=document.createElement('button');
+    b.className='fb';b.dataset.cat=cat;
+    b.textContent=cat.length>20?cat.split(' ').slice(0,3).join(' '):cat;
+    b.onclick=()=>applyF(cat); fr.appendChild(b);
+  });
+}
+function applyF(cat){
+  document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('on',b.dataset.cat===cat));
+  desel();
+  if(cat==='all'){ d3.selectAll('.nd').classed('dm',false); d3.selectAll('.lnk').classed('dm',false); return; }
+  const vis=new Set(nodes.filter(n=>n.cat===cat).map(n=>n.id));
+  d3.selectAll('.nd').classed('dm',n=>!vis.has(n.id));
+  d3.selectAll('.lnk').classed('dm',l=>{
+    const s=typeof l.source==='object'?l.source.id:l.source;
+    const t=typeof l.target==='object'?l.target.id:l.target;
+    return !vis.has(s)&&!vis.has(t);
+  });
+}
+
+// ── legend ────────────────────────────────────────────────────────────────
+function buildLegend(){
+  const cats=[...new Set(nodes.map(n=>n.cat).filter(Boolean))];
+  const el=document.getElementById('lgi'); el.innerHTML='';
+  cats.forEach(cat=>{
+    const r=document.createElement('div'); r.className='lgr';
+    r.innerHTML=`<div class="lgd" style="background:${gc(cat)}"></div><span>${cat.length>28?cat.slice(0,28)+'…':cat}</span>`;
+    r.onclick=()=>applyF(cat); el.appendChild(r);
+  });
+}
+
+// ── fit / zoom ────────────────────────────────────────────────────────────
+function fit(){
+  if(!nodes.length||!zoomB) return;
+  const xs=nodes.map(n=>n.x), ys=nodes.map(n=>n.y);
+  const mnX=Math.min(...xs)-90, mxX=Math.max(...xs)+90;
+  const mnY=Math.min(...ys)-50, mxY=Math.max(...ys)+50;
+  const gw=mxX-mnX, gh=mxY-mnY;
+  const sc=Math.min(.9,W/gw,H/gh);
+  const tx=(W-gw*sc)/2-mnX*sc, ty=(H-gh*sc)/2-mnY*sc;
+  svgEl.transition().duration(700)
+    .call(zoomB.transform,d3.zoomIdentity.translate(tx,ty).scale(sc));
+}
+document.getElementById('zi').onclick=()=>svgEl.transition().duration(250).call(zoomB.scaleBy,1.4);
+document.getElementById('zo').onclick=()=>svgEl.transition().duration(250).call(zoomB.scaleBy,.7);
+document.getElementById('zf').onclick=fit;
+
+// ── load CSV ──────────────────────────────────────────────────────────────
+function loadText(txt,label){
+  const dot=document.getElementById('sdot');
+  dot.className='sdot spin';
+  setTimeout(()=>{
+    try{
+      const rows=parseCSV(txt);
+      if(!rows.length){alert('No data rows found.');dot.className='sdot';return;}
+      render(rows);
+      dot.className='sdot ok';
+      document.getElementById('upTxt').textContent=label||`${rows.length} nodes`;
+    }catch(e){console.error(e);alert('Parse error: '+e.message);dot.className='sdot';}
+  },10);
+}
+
+document.getElementById('csvFile').addEventListener('change',function(){
+  const f=this.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>loadText(e.target.result,f.name);
+  r.readAsText(f,'latin-1');
+});
+
+// ── auto-load vrdu_dependencies.csv ──────────────────────────────────────
+(async()=>{
+  const candidates=[
+    'vrdu_dependencies.csv',
+    'vrdu_depedencies.csv',    // typo variant
+    './vrdu_dependencies.csv',
+  ];
+  for(const p of candidates){
+    try{
+      const res=await fetch(p);
+      if(!res.ok) continue;
+      const txt=await res.text();
+      if(txt.trim().length>80){ loadText(txt,'Auto-loaded'); return; }
+    }catch(e){}
+  }
+})();
+
+// ── drag & drop ───────────────────────────────────────────────────────────
+const dov=document.getElementById('dov');
+document.addEventListener('dragover',e=>{e.preventDefault();dov.classList.add('vis');});
+document.addEventListener('dragleave',e=>{if(!e.relatedTarget)dov.classList.remove('vis');});
+document.addEventListener('drop',e=>{
+  e.preventDefault();dov.classList.remove('vis');
+  const f=e.dataTransfer.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>loadText(ev.target.result,f.name);
+  r.readAsText(f,'latin-1');
+});
+
+// ── resize ────────────────────────────────────────────────────────────────
+window.addEventListener('resize',()=>{
+  W=window.innerWidth;H=window.innerHeight-56;
+  if(nodes.length){
+    layout();
+    d3.selectAll('.nd').attr('transform',d=>`translate(${d.x},${d.y})`);
+    gRoot.selectAll('path.lnk').attr('d',lp);
+  }
+});
+</script>
+</body>
+</html>
