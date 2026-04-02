@@ -4,7 +4,7 @@ import { getHex, YEAR_MAP } from '../utils/colours';
 import { NODE_W_EXPORT as NODE_W, NODE_H_EXPORT as NODE_H } from '../hooks/useTreeLayout';
 import './TreeCanvas.css';
 
-const TIER_LABELS = ['T0 · Algorithms', 'T1 · Foundations', 'T2 · Encoders', 'T3 · Models', 'T4 · Tools', 'T5 · DocVQA'];
+const TIER_LABELS = ['T0 · Foundations', 'T1 · Pre-Training', 'T2 · Fine-Tuning', 'T3 · LLMs', 'T4 · Tools', 'T5 · Multi-Page VRDU'];
 const TIER_BG_ALPHA = [0.04, 0.03, 0.025, 0.02, 0.025, 0.05];
 
 export default function TreeCanvas({
