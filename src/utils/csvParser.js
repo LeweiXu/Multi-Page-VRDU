@@ -81,20 +81,29 @@ export async function loadNodes() {
       return obj;
     })
     .filter(n => n['Name'] && n['Name'] !== '')
-    .map(n => ({
-      tier:        parseInt(n['Tier'] || '0', 10),
-      name:        n['Name'],
-      deps:        parseDeps(n['Dependencies']),
-      rels:        parseRels(n['Relationship']),
-      // CSV schema uses Category; keep Type as fallback for compatibility.
-      type:        n['Category'] || n['Type'] || '',
-      description: n['Description'] || '',
-      technique:   n['Key Technique'] || '',
-      architecture:n['Architecture'] || '',
-      objective:   n['(Pre)-training Objective'] || '',
-      bibtex:      n['BibTex (Unverified)'] || n['BibTex (Needs Checking)'] || '',
-      rationale:   n['Rationale'] || '',
-    }));
+    .map(n => {
+      const bibtex = n['BibTex (Unverified)'] || n['BibTex (Needs Checking)'] || '';
+      return {
+        tier:        parseInt(n['Tier'] || '0', 10),
+        name:        n['Name'],
+        deps:        parseDeps(n['Dependencies']),
+        rels:        parseRels(n['Relationship']),
+        // CSV schema uses Category; keep Type as fallback for compatibility.
+        type:        n['Category'] || n['Type'] || '',
+        description: n['Description'] || '',
+        technique:   n['Key Technique'] || '',
+        architecture:n['Architecture'] || '',
+        objective:   n['(Pre)-training Objective'] || '',
+        bibtex,
+        year:        extractYear(bibtex),
+        rationale:   n['Rationale'] || '',
+      };
+    });
+}
+
+function extractYear(text) {
+  const match = String(text || '').match(/\d{4}/);
+  return match ? parseInt(match[0], 10) : null;
 }
 
 function parseDeps(str) {

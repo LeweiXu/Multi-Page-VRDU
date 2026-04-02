@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import * as d3 from 'd3';
-import { getHex, YEAR_MAP } from '../utils/colours';
+import { getHex } from '../utils/colours';
 import { NODE_W_EXPORT as NODE_W, NODE_H_EXPORT as NODE_H } from '../hooks/useTreeLayout';
 import './TreeCanvas.css';
 
@@ -252,7 +252,7 @@ export default function TreeCanvas({
           {/* Nodes */}
           {layoutNodes.map(node => {
             const color  = getHex(node.type);
-            const year   = YEAR_MAP[node.name];
+            const year   = node.year;
             const opacity = nodeOpacity(node);
             const isSelected = selectedNode?.name === node.name;
             const isConnected = selectedNode && isHighlighted(node) && !isSelected;

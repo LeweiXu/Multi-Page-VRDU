@@ -1,12 +1,11 @@
 import React from 'react';
 import { getHex } from '../utils/colours';
-import { YEAR_MAP } from '../utils/colours';
 import './DetailPanel.css';
 
 export default function DetailPanel({ node, edges, nodes, onClose, onSelectNode }) {
   if (!node) return null;
 
-  const year  = YEAR_MAP[node.name] || null;
+  const year  = node.year || null;
   const color = getHex(node.type);
 
   // Incoming edges (who depends on this node)
