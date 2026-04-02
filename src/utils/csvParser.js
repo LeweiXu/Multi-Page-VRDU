@@ -93,6 +93,7 @@ export async function loadNodes() {
       architecture:n['Architecture'] || '',
       objective:   n['(Pre)-training Objective'] || '',
       bibtex:      n['BibTex (Unverified)'] || n['BibTex (Needs Checking)'] || '',
+      rationale:   n['Rationale'] || '',
     }));
 }
 

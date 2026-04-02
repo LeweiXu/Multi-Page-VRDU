@@ -58,6 +58,13 @@ export default function DetailPanel({ node, edges, nodes, onClose, onSelectNode 
           </section>
         )}
 
+        {node.rationale && node.rationale != 'N/A ' && (
+          <section className="dp-section">
+            <h3 className="dp-section-title">Rationale</h3>
+            <p className="dp-text">{node.rationale}</p>
+          </section>
+        )}
+
         {node.bibtex && node.bibtex !== 'N/A' && (
           <section className="dp-section">
             <h3 className="dp-section-title">BibTeX key</h3>
