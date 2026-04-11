@@ -1,0 +1,168 @@
+% ============================================================
+%  Practice Seminar — Honours Research
+%  Lewei Xu | BACS (Honours)
+%  Training-Free Agentic RAG Framework for MP-VRDU
+% ============================================================
+\documentclass[aspectratio=169]{beamer}
+
+% ---------- Theme ----------
+\usetheme{default}
+\usecolortheme{default}
+
+% ---------- Fonts ----------
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% ---------- Packages ----------
+\usepackage{xcolor}
+\usepackage{microtype}
+
+% ---------- Beamer settings ----------
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{
+  \hbox{\hfill
+    \usebeamerfont{footline}\color{gray}\small
+      \quad\quad
+    \insertframenumber\,/\,\inserttotalframenumber
+    \hspace{0.4cm}
+  }
+  \vspace{0.15cm}
+}
+\setbeamertemplate{itemize item}{--}
+\setbeamertemplate{itemize subitem}{--}
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+
+% ---------- Title info ----------
+\title{Training-Free Agentic RAG Framework for Multi-Page Visually Rich Document Understanding}
+\author{Lewei Xu}
+\institute{Supervisors: Dr.\ Yihao Ding \& Dr.\ Daochang Liu}
+\date{Practice Seminar}
+
+% ============================================================
+\begin{document}
+
+% ============================================================
+%  SLIDE 1 — PROJECT DESCRIPTION
+% ============================================================
+\begin{frame}
+
+  % Title as main focus
+  \vspace{0.6cm}
+  {\Large\bfseries Training-Free Agentic RAG Framework for\\[0.3em]
+  Multi-Page Visually Rich Document Understanding}
+
+  \vspace{0.5cm}
+  \hrule
+  \vspace{0.4cm}
+
+  \small
+  \begin{itemize}
+    \item \textbf{Document Understanding} — tasks such as question answering,
+          information extraction, summarisation
+    \item \textbf{Visually Rich} — not just text, but also charts, plots,
+          images, tables, scanned pages
+    \item \textbf{Multi-Page} — quadratic increase in compute and memory;
+          multi-hop reasoning; answer page/passage retrieval
+  \end{itemize}
+
+  \vspace{0.3cm}
+  \footnotesize\color{gray}
+  Lewei Xu \quad|\quad
+  Supervisors: Dr.\ Yihao Ding \& Dr.\ Daochang Liu \quad|\quad
+  BACS (Honours)
+
+\end{frame}
+
+% ============================================================
+%  SLIDE 2 — MOTIVATION
+% ============================================================
+\begin{frame}{Motivation}
+
+  \begin{columns}[T]
+
+    \begin{column}{0.48\textwidth}
+      \textbf{Why does this problem matter?}
+      \vspace{0.2cm}
+      \begin{itemize}
+        \item Manual document review is expensive and labour-intensive
+        \item Contracts, invoices, and reports require skilled human analysts
+        \item Legacy paper records exist only as scanned image-PDFs;
+              mass processing unlocks their value
+        \item Organisations handle thousands of long documents daily
+              — current tools do not scale
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \textbf{Why is it hard?}
+      \vspace{0.2cm}
+      \begin{itemize}
+        \item SOTA MLLMs perform well on single-page or short documents
+        \item Long documents ($>$100 pages) exceed context windows
+        \item Visual elements require spatial reasoning, not just text parsing
+        \item Multi-hop questions require evidence across
+              non-adjacent pages
+      \end{itemize}
+    \end{column}
+
+  \end{columns}
+
+\end{frame}
+
+% ============================================================
+%  SLIDE 3 — SOLUTIONS / CURRENT APPROACHES
+% ============================================================
+\begin{frame}{Solutions \& Current Approaches}
+
+  Three families of approaches to Multi-Page DocVQA:
+
+  \vspace{0.3cm}
+
+  \begin{columns}[T]
+
+    \begin{column}{0.31\textwidth}
+      \textbf{1. Scale Single-Page Models}
+      \vspace{0.1cm}
+      \begin{itemize}\small
+        \item Most intuitive approach
+        \item Feed all pages as one long context
+        \item Fails at context-window limits
+        \item Weakest benchmark performance
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.31\textwidth}
+      \textbf{2. Context Compression}
+      \vspace{0.1cm}
+      \begin{itemize}\small
+        \item Compress document representations
+        \item Cross-attention filters query-relevant content
+        \item Reduces tokens but loses visual fidelity
+        \item Does not solve the root problem
+      \end{itemize}
+    \end{column}
+
+    \begin{column}{0.31\textwidth}
+      \textbf{3. RAG + Agentic Retrieval}
+      \vspace{0.1cm}
+      \begin{itemize}\small
+        \item Retrieve answer pages/passages first
+        \item Agentic loop: retrieve $\to$ refine $\to$ answer
+        \item Most promising direction
+        \item \textbf{Training-free} — uses existing LLM backbone
+      \end{itemize}
+    \end{column}
+
+  \end{columns}
+
+  \vspace{0.4cm}
+  \hrule
+  \vspace{0.2cm}
+  \small\textbf{This project:} Training-Free Agentic RAG — no fine-tuning
+  required; an existing MLLM backbone within an iterative retrieval loop.
+
+\end{frame}
+
+% ============================================================
+\end{document}
