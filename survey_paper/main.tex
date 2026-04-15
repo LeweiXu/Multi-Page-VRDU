@@ -1,0 +1,226 @@
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[review]{acl}
+
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% This is also not strictly necessary, and may be commented out.
+% However, it will improve the aesthetics of text in
+% the typewriter font.
+\usepackage{inconsolata}
+
+%Including images in your LaTeX document requires adding
+%additional package(s)
+\usepackage{graphicx}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{adjustbox}   % for \begin{adjustbox}
+\usepackage{natbib}      % for \citeyear  (or use biblatex)
+\usepackage{lscape}      % optional: landscape
+\usepackage{float}
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+\title{Instructions for *ACL Proceedings}
+
+% Author information can be set in various styles:
+% For several authors from the same institution:
+% \author{Author 1 \and ... \and Author n \\
+%         Address line \\ ... \\ Address line}
+% if the names do not fit well on one line use
+%         Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
+% For authors from different institutions:
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \And  ... \And
+%         Author n \\ Address line \\ ... \\ Address line}
+% To start a separate ``row'' of authors use \AND, as in
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \AND
+%         Author 2 \\ Address line \\ ... \\ Address line \And
+%         Author 3 \\ Address line \\ ... \\ Address line}
+
+\author{First Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  \texttt{email@domain} \\\And
+  Second Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  \texttt{email@domain} \\}
+
+%\author{
+%  \textbf{First Author\textsuperscript{1}},
+%  \textbf{Second Author\textsuperscript{1,2}},
+%  \textbf{Third T. Author\textsuperscript{1}},
+%  \textbf{Fourth Author\textsuperscript{1}},
+%\\
+%  \textbf{Fifth Author\textsuperscript{1,2}},
+%  \textbf{Sixth Author\textsuperscript{1}},
+%  \textbf{Seventh Author\textsuperscript{1}},
+%  \textbf{Eighth Author \textsuperscript{1,2,3,4}},
+%\\
+%  \textbf{Ninth Author\textsuperscript{1}},
+%  \textbf{Tenth Author\textsuperscript{1}},
+%  \textbf{Eleventh E. Author\textsuperscript{1,2,3,4,5}},
+%  \textbf{Twelfth Author\textsuperscript{1}},
+%\\
+%  \textbf{Thirteenth Author\textsuperscript{3}},
+%  \textbf{Fourteenth F. Author\textsuperscript{2,4}},
+%  \textbf{Fifteenth Author\textsuperscript{1}},
+%  \textbf{Sixteenth Author\textsuperscript{1}},
+%\\
+%  \textbf{Seventeenth S. Author\textsuperscript{4,5}},
+%  \textbf{Eighteenth Author\textsuperscript{3,4}},
+%  \textbf{Nineteenth N. Author\textsuperscript{2,5}},
+%  \textbf{Twentieth Author\textsuperscript{1}}
+%\\
+%\\
+%  \textsuperscript{1}Affiliation 1,
+%  \textsuperscript{2}Affiliation 2,
+%  \textsuperscript{3}Affiliation 3,
+%  \textsuperscript{4}Affiliation 4,
+%  \textsuperscript{5}Affiliation 5
+%\\
+%  \small{
+%    \textbf{Correspondence:} \href{mailto:email@domain}{email@domain}
+%  }
+%}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+Needs citations.
+\begin{itemize}
+    \item Documents are the primary medium through which organisations record and communicate information, with many critical real-world document types such as contracts, financial reports, scientific papers, tecnical manuals, textbooks, inherently spanning multiple pages and containing interleaved text, tables, figures and complex layouts \cite{tito2023hierarchical, borchmann2025arctic}
+    \item Manually extracting information is time-consuming, expensive, and prone to human error; development of automated DocVQA systems that can answer natural-language queries over document images aims to solve this
+    \item Significant progress has been made on single-page docVQA, with current SOTA models on-par if not exceeding human level performance, but vast majority of real-world documents extend beyond single page \cite{tito2023hierarchical}
+    \item Evidence required to answer a question is often located on multiple pages scattered throughout the document, requiring a model to navigate, retrieve and reason across the entire document \cite{blau2024gram, borchmann2025arctic}
+    \item challenges from single-page to multi-page VQA: 1. input token count scales linearly (or worse) quickly exceeding context window of existing LLMs and MLLMs, visually rich pages containing high resolution figures/tables/charts contribute to this. 2. capturing cross-page semantic and logical dependencies requires explicit long-range reasoning. 3. Explainability becomes more difficult as models need to also pinpoint how they arrived at the answer via answer page/passage retrieval.
+    \item Early mult-page approaches adapt pre-trained language models to document domain treating OCR'd documents as a long text sequence however these methods ignored visual content.
+    \item Subsequent work introduced hierarchical page-level architectures \cite{tito2023hierarchical} and global-reasoning token mechanisms \cite{blau2024gram} to enable cross-page reasoning and interaction achieving strong results but struggled with longer documents
+    \item Unlike existing surveys that focus on single-page and broad document VRDU \cite{ding2025survey}, this survey focuses exclusively on the multi-page frontier for document question answering.
+    \item we survey 30 (could be more) representative models spanning both OCR-dependent and OCR-free approaches.
+\end{itemize}
+
+\section{MP-VRDU Framework Overview}
+\begin{itemize}
+    \item MP-VRDU frameworks can be classified along 2 axes: 1. OCR dependency and 2. multi-page strategy
+    \item table 1 summarises surveyed models along these 2 axes, along with LLM backbone, vision encoder, prompt strategy, RAG strategy, agentic strategy, modality and downstream tasks
+\end{itemize}
+
+% Will add caption later
+\include{latex/model_table}
+
+% Lewei Note: not terribly well versed with single-page VRDU, please check the content, needs citations
+\subsection{Single Page Frameworks}
+
+\textbf{OCR-Dependent Frameworks}
+\begin{itemize}
+    \item OCR-dependent single-page frameworks extract text and often times bounding-box layout information as well using an off-the-shelf OCR engine or PDF parser (which uses OCR).
+    \item Often combined with document image to construct a joint multimodal representation using adapter or projector and fed into a language model  cite{layoutlmv3, docformerv2}
+    \item Advantage of OCR is accuracy, it provides clean structured text even in low-resolution images
+    \item Disadvantage is error-propagation, OCR mistakes upstream can degrade downstream answer quality, especially with handwritten documents \cite{wang2024docllm}
+\end{itemize}
+
+\textbf{OCR-Free Frameworks}
+\begin{itemize}
+    \item OCR-free frameworks directly consume high-resolution document images through a vision encoder, bypassing explicit text extraction. Text recognition is learned through large-scale pre-training on document image-text pairs cite{donut, pix2struct, CLIP}
+    \item Allows for end-to-end differentiability and more easily preserve visual layout (font, colours, spatial arrangement) that OCR struggles with.
+    \item Disadvantage is large number of visual tokens produced for high-resolution inputs, trivial in single-page settings but particularly expensive when scaling to the multi-page setting
+    \item On single page documents using OCR-free models, performance is currently on-par if not better than human performance cite{qwenVL(2.5/3/3.5), docowl}
+\end{itemize}
+
+\subsection{Multiple Page Frameworks}
+
+\begin{itemize}
+    \item Unlike SP frameworks, MP frameworks need to simultaeneously address scalability, relevance and cross-page reasoning (needs citation)
+    \item As document length increases, model performance degrades significantly even with strong long-context MLLMs well before the full context-window is reached as a result of attention dilution (needs citation)
+\end{itemize}
+
+\textbf{OCR-Dependent Frameworks}
+\begin{itemize}
+    \item 
+\end{itemize}
+
+\textbf{OCR-Free Frameworks}
+
+\section{Multimodal Information Modelling}
+
+\subsection{Text}
+\paragraph{General Text Information Representation}
+
+\paragraph{Long Text Sequence}
+
+Skip-attention (Sparse Attention)
+
+Any techniques specifci designed for document. 
+If no, you can point out some possible limitations
+%Word -> Entity/Sentence -> Page Level/Section
+
+% Long context sequence -> General methods link to few surveys, 
+\subsection{Image}
+%Image Patch Entity -?=> Page Level
+% Highligh Resolution Image
+\subsection{Layout/Logical (Hierarchical Structure)}
+%Word Bounding (textline bounding box) -> Reading Order-> Page ID / Correlation between caption/figure, subsection/section
+
+\subsection{Multimodal Fusion Overview}
+%archigecture designing Cross-attention, Self-attention, Lora, MLP
+%
+\section{Training}
+
+\section{Training Free Strategies}
+% Prompt Engineering, RAG and Agentic Framework
+
+\section{Datasets}
+
+\section{Challenges}
+\section*{Acknowledgments}
+
+
+% Bibliography entries for the entire Anthology, followed by custom entries
+%\bibliography{anthology,custom}
+% Custom bibliography entries only
+\bibliography{custom}
+
+\appendix
+
+\section{Example Appendix}
+\label{sec:appendix}
+
+This is an appendix.
+
+\end{document}

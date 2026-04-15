@@ -33,14 +33,13 @@ OUTPUT_TEX = sys.argv[2] if len(sys.argv) > 2 else "models_table.tex"
 COLUMNS = [
     ("Name",               r"Model",           r"l"),
     ("Venue",              r"Venue",            r"l"),
-    ("Downstream Task",    r"Tasks",            r"p{2.8cm}"),
-    ("Input Doc Mod.",     r"Doc.~Mod.",        r"c"),
-    ("Prompt Mod.",        r"Prompt~Mod.",      r"c"),
+    ("Downstream Tasks",    r"Tasks",            r"p{2.8cm}"),
+    ("Modality",     r"Mod.",        r"c"),
     ("Vision Encoder",     r"Vision Encoder",   r"p{2.8cm}"),
-    ("LLM/MLLM",          r"LLM/MLLM",         r"p{3.0cm}"),
-    ("Prompt Strategies",  r"Prompt Strat.",    r"c"),
-    ("RAG Strategies",     r"RAG Strat.",       r"c"),
-    ("Agentic",            r"Agentic",          r"c"),
+    ("LLM Backbone",          r"LLM Backbone",         r"p{3.0cm}"),
+    ("Prompt Strategy",  r"Prompt Strat.",    r"c"),
+    ("RAG Strategy",     r"RAG Strat.",       r"c"),
+    ("Agentic Strategy",            r"Agentic",          r"c"),
 ]
 
 def escape_latex(val):
@@ -136,12 +135,11 @@ def main():
 \begin{{table}}[htbp]
 \centering
 \caption{{Survey of VRDU models, split by OCR dependency.
-  \textbf{{Doc.~Mod.}} = document modality accepted by the model;
-  \textbf{{Prompt~Mod.}} = modality of the input prompt;
+  \textbf{{Mod.}} = modality of document used by model.
   \textbf{{T}} = text, \textbf{{V}} = visual/image, \textbf{{L}} = layout.
   `--' indicates not reported.}}
 \label{{tab:model_survey}}
-\begin{{adjustbox}}{{max width=\linewidth}}
+\begin{{adjustbox}}{{max width=\textwidth}}
 \begin{{tabular}}{{{col_spec}}}
 \toprule
 {col_headers} \\

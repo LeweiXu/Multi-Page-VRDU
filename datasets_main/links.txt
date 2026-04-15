@@ -1,0 +1,15 @@
+https://openaccess.thecvf.com/content/ICCV2023/papers/Van_Landeghem_Document_Understanding_Dataset_and_Evaluation_DUDE_ICCV_2023_paper.pdf
+https://arxiv.org/pdf/2212.05935
+https://proceedings.neurips.cc/paper_files/paper/2024/file/ae0e43289bffea0c1fa34633fc608e92-Paper-Datasets_and_Benchmarks_Track.pdf
+https://aclanthology.org/2025.acl-long.57.pdf
+https://www.ijcai.org/proceedings/2024/0690.pdf
+https://ojs.aaai.org/index.php/AAAI/article/view/26598/26370
+https://openaccess.thecvf.com/content/ICCV2025W/Findings/papers/Cho_M3DocVQA_Multi-modal_Multi-page_Multi-document_Understanding_ICCVW_2025_paper.pdf
+https://proceedings.neurips.cc/paper_files/paper/2024/file/24a8968affe71ffe4067d022b9d16566-Paper-Datasets_and_Benchmarks_Track.pdf
+https://openaccess.thecvf.com/content/CVPR2025/papers/Duan_Docopilot_Improving_Multimodal_Models_for_Document-Level_Understanding_CVPR_2025_paper.pdf
+https://arxiv.org/pdf/2304.06447
+https://proceedings.neurips.cc/paper_files/paper/2024/file/7c06759d1a8567f087b02e8589454917-Paper-Datasets_and_Benchmarks_Track.pdf
+https://aclanthology.org/2025.emnlp-main.469.pdf
+https://aclanthology.org/2022.findings-acl.105.pdf
+https://ojs.aaai.org/index.php/AAAI/article/download/29874/31524
+https://arxiv.org/pdf/2406.11633

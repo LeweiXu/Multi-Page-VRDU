@@ -20,57 +20,56 @@
 \begin{table}[htbp]
 \centering
 \caption{Survey of VRDU models, split by OCR dependency.
-  \textbf{Doc.~Mod.} = document modality accepted by the model;
-  \textbf{Prompt~Mod.} = modality of the input prompt;
+  \textbf{Mod.} = modality of document used by model.
   \textbf{T} = text, \textbf{V} = visual/image, \textbf{L} = layout.
   `--' indicates not reported.}
 \label{tab:model_survey}
-\begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{l|l|p{2.8cm}|c|c|p{2.8cm}|p{3.0cm}|c|c|c}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{l|l|p{2.8cm}|c|p{2.8cm}|p{3.0cm}|c|c|c}
 \toprule
-\textbf{Model} & \textbf{Venue} & \textbf{Tasks} & \textbf{Doc.~Mod.} & \textbf{Prompt~Mod.} & \textbf{Vision Encoder} & \textbf{LLM/MLLM} & \textbf{Prompt Strat.} & \textbf{RAG Strat.} & \textbf{Agentic} \\
+\textbf{Model} & \textbf{Venue} & \textbf{Tasks} & \textbf{Mod.} & \textbf{Vision Encoder} & \textbf{LLM Backbone} & \textbf{Prompt Strat.} & \textbf{RAG Strat.} & \textbf{Agentic} \\
 \midrule
 
 % ── OCR-Dependent ─────────────────────────────────────────────────────────────
 \rowcolor{sectionbg}
-\multicolumn{10}{|l|}{\textbf{OCR-Dependent}} \\
+\multicolumn{9}{|l|}{\textbf{OCR-Dependent}} \\
 \midrule
-  \textbf{Doc-Agent}~(\citeyear{sun2025docagent}) & EMNLP & VQA & T, V & T & - & LLaMA 3 & CoT/ReAct & Sparse & Open \\
-  \textbf{MDocAgent}~(\citeyear{han2025mdocagent}) & preprint & QA & T, V & T, V & ColPali, Qwen2-VL & LLaMA-3.1-8B-Instruct, Qwen2-VL-7B-Instruct & - & Joint & Open \\
-  \textbf{KGP}~(\citeyear{wang2024knowledge}) & AAAI & QA & T & T & - & T5-large, GPT-3.5 & - & Joint & Open \\
-  \textbf{LayTokenLLM}~(\citeyear{zhu2025simple}) & CVPR & QA & T, L & T, L & - & LLaMA3-8B, Qwen1.5-7B & - & - & - \\
-  \textbf{CREAM}~(\citeyear{zhang2024cream}) & ACM & VQA & T, V & T & Pix2Struct & LLaMA2-7B & - & Dense & Fixed \\
-  \textbf{MHier-RAG}~(\citeyear{gong2025mhier}) & preprint & VQA & T, L & T & ColPali, Qwen-VL-Plus & Multiple & CoT & Joint & - \\
-  \textbf{DocDancer}~(\citeyear{zhang2026docdancer}) & preprint & VQA & T & T & - & Qwen3-4B, Qwen3-30B & CoT/ReAct & - & Open \\
-  \textbf{InstructDr}~(\citeyear{tanaka2024instructdoc}) & AAAI & KIE, QA & T, L, V & T, V & CLIP & FlanT5 & - & - & - \\
-  \textbf{PDF-WuKong}~(\citeyear{xie2024wukong}) & preprint & QA & T, V & T, V & IXC2-VL-4KHD & LLaVA, Qwen2-VL & - & - & - \\
-  \textbf{LayoutLLM}~(\citeyear{luo2024layoutllm}) & CVPR & VQA, KIE, VIE & T, V, L & T & LayoutLMv3-large & LLaMA 3 & CoT & - & - \\
-  \textbf{Hi-VT5}~(\citeyear{tito2023hierarchical}) & preprint & QA & V & T, V, L & DIT & T5 & - & - & - \\
-  \textbf{GRAM}~(\citeyear{blau2024gram}) & CVPR & VQA & T, V, L & T & DocFormerv2 & T5 & - & - & - \\
-  \textbf{Arctic-TILT}~(\citeyear{borchmann2025arctic}) & ACL & QA, KIE & V, T, L & T & U-Net variant & T5 & - & - & - \\
-  \textbf{DocLLM}~(\citeyear{wang2024docllm}) & ACL & VQA, KIE, NLI, CLS & T, L & T & - & LLaMA 3 & - & - & - \\
-  \textbf{DocSLM}~(\citeyear{han2025docslm}) & CVPR & VQA & T, V, L & T & SigLIP2 & T5 & - & - & - \\
-  \textbf{DocLayLLM}~(\citeyear{liao2025doclayllm}) & CVPR & VQA & T, V, L & T & LayoutLMv3 & LLaMA 2, LLaMA 3 & - & - & - \\
+  \textbf{ViDoRAG}~(\citeyear{wang2025vidorag}) & EMNLP & QA & T, V & Multiple & Multiple & ReAct & Joint & Open \\
+  \textbf{Doc-Agent}~(\citeyear{sun2025docagent}) & EMNLP & QA & T, V, L & - & Multiple & ReAct & Sparse & Open \\
+  \textbf{MDocAgent}~(\citeyear{han2025mdocagent}) & preprint & QA & T, V & ColPali & Multiple & - & Dense & Fixed \\
+  \textbf{KGP}~(\citeyear{wang2024knowledge}) & AAAI & QA & T, L & - & Multiple & - & Sparse & Fixed \\
+  \textbf{LayTokenLLM}~(\citeyear{zhu2025simple}) & CVPR & QA, KIE & T, L & - & Multiple & - & - & - \\
+  \textbf{CREAM}~(\citeyear{zhang2024cream}) & ACM & QA & T, V & Pix2Struct & LLaMA2-7B & - & Dense & Fixed \\
+  \textbf{MHier-RAG}~(\citeyear{gong2025mhier}) & preprint & QA & T, V, L & Qwen-VL-Plus & Multiple & CoT, SO & Joint & - \\
+  \textbf{CoR}~(\citeyear{guo2026end}) & ICLR & QA & V & Qwen2.5-VL & Qwen2.5-VL-7B & CoT (CoR) & - & - \\
+  \textbf{DocDancer}~(\citeyear{zhang2026docdancer}) & preprint & QA & T, V, L & Qwen3-VL-235B-A22B-Instruct & Qwen3-4B/30B-A3B & ReAct & - & Open \\
+  \textbf{InstructDr}~(\citeyear{tanaka2024instructdoc}) & AAAI & QA, KIE, DC & T, V, L & CLIP & FlanT5 & - & - & - \\
+  \textbf{PDF-WuKong}~(\citeyear{xie2024wukong}) & preprint & QA & T, V & IXC2-VL-4KHD & BGE-M3 & - & Joint & - \\
+  \textbf{LayoutLLM}~(\citeyear{luo2024layoutllm}) & CVPR & QA, KIE, DC & T, V, L & LayoutLMv3 & Vicuna-7B-v1.5 & - & - & - \\
+  \textbf{Hi-VT5}~(\citeyear{tito2023hierarchical}) & preprint & QA, PageID & T, V, L & DiT & T5 & - & - & - \\
+  \textbf{GRAM}~(\citeyear{blau2024gram}) & CVPR & QA & T, V, L & DocFormerv2 & DocFormerv2 & - & - & - \\
+  \textbf{Arctic-TILT}~(\citeyear{borchmann2025arctic}) & ACL & QA, KIE & T, V, L & U-Net & T5-Large & - & - & - \\
+  \textbf{DocLLM}~(\citeyear{wang2024docllm}) & ACL & QA, KIE, NLI & T, L & - & Multiple & - & - & - \\
+  \textbf{DocSLM}~(\citeyear{han2025docslm}) & CVPR & QA & T, V, L & SigLIP2 & Qwen2.5-1.5B & - & - & - \\
+  \textbf{DocLayLLM}~(\citeyear{liao2025doclayllm}) & CVPR & QA, KIE, tableU & T, V, L & LayoutLMv3 & Multiple & - & - & - \\
 \midrule[0.4pt]
 
 % ── OCR-Free ──────────────────────────────────────────────────────────────────
 \rowcolor{sectionbg}
-\multicolumn{10}{|l|}{\textbf{OCR-Free}} \\
+\multicolumn{9}{|l|}{\textbf{OCR-Free}} \\
 \midrule
-  \textbf{ViDoRAG}~(\citeyear{wang2025vidorag}) & EMNLP & QA & T, V & T, V & ColPali, Qwen2.5-VL, LLaMA3.2-Vision & Qwen2.5-VL, LLaMA3.2-Vision & CoT/ReAct & Dense & Open \\
-  \textbf{Doc-React}~(\citeyear{wu2025doc}) & ACL & VQA & V & T & - & GPT-4o & CoT/ReAct & Dense & Open \\
-  \textbf{M3DocRAG}~(\citeyear{cho2024m3docrag}) & preprint & VQA & V & T & - & Qwen2-VL 7B & - & Dense & - \\
-  \textbf{VDocRAG}~(\citeyear{tanaka2025vdocrag}) & CVPR & VQA & V & T & Phi3V & Phi3V-4.2B, Idefics3-8B & - & Dense & - \\
-  \textbf{MoLoRAG}~(\citeyear{wu2025molorag}) & EMNLP & VQA & V & T & ColPali, ColQwen2-VL-2B & Qwen2.5-VL-3B, Qwen2.5-VL-7B & - & Dense & - \\
-  \textbf{AVIR}~(\citeyear{li2025avir}) & ACM & VQA & V & T & Pix2Struct & Qwen2.5-VL-3B-AWQ & - & Dense & - \\
-  \textbf{DFVC}~(\citeyear{qian2026accurate}) & MDPI & DocRetrieve & V & T & MiniCPM-V, Qwen2-VL, ColPali & MiniCPM-V, Qwen2-VL & - & Dense & - \\
-  \textbf{CoR}~(\citeyear{guo2026end}) & ICLR (under review) & VQA & V & T & Qwen2.5-VL & Qwen2.5-VL & CoT & - & - \\
-  \textbf{Self-Attention Scoring}~(\citeyear{kang2024multi}) & ICDAR & QA & V & T, V & Pix2Struct & - & - & Dense & - \\
-  \textbf{Texthawk2}~(\citeyear{yu2024texthawk2}) & preprint & OCR, QA & V & T, L,V & SigLIP-SO400M & Qwen2-7B-Instruct & - & - & - \\
-  \textbf{Leopard}~(\citeyear{jia2024leopard}) & TMLR & QA & T, V & T, V & SigLIP & LLaVA, Idefics2 & - & - & - \\
-  \textbf{mPLUG-DocOwl2}~(\citeyear{hu2025mplug}) & ACL & KIE, QA & V & T, V, L & CLIP & mPLUG-Owl2 & - & - & - \\
-  \textbf{DocR1}~(\citeyear{xiong2026docr1}) & AAAI & VQA & V & T & Qwen2.5-VL & Qwen2.5-VL, DeepSeek-R1 & CoT & - & - \\
-  \textbf{Docopilot}~(\citeyear{duan2025docopilot}) & CVPR & VQA & V, T & T & InternViT-300M & InternLM2 & - & - & - \\
+  \textbf{Doc-React}~(\citeyear{wu2025doc}) & ACL & QA & V & ColPali & GPT-4o & ReAct & Dense & Open \\
+  \textbf{M3DocRAG}~(\citeyear{cho2024m3docrag}) & preprint & QA & V & ColPali & Multiple & - & Dense & - \\
+  \textbf{VDocRAG}~(\citeyear{tanaka2025vdocrag}) & CVPR & QA & V & Phi3V-4.2B & Phi3V-4.2B & - & Dense & - \\
+  \textbf{MoLoRAG}~(\citeyear{wu2025molorag}) & EMNLP & QA & V & ColPali & Multiple & - & Dense & - \\
+  \textbf{AVIR}~(\citeyear{li2025avir}) & ACM & QA & V & Pix2Struct & Qwen2.5-VL-3B-AWQ & - & Dense & - \\
+  \textbf{DFVC}~(\citeyear{qian2026accurate}) & MDPI & QA, DocRetrieval & V & Multiple & Qwen2-VL-2B & - & Dense & - \\
+  \textbf{Self-Attention Scoring}~(\citeyear{kang2024multi}) & ICDAR & QA & V & Pix2Struct & Pix2Struct & - & Dense & - \\
+  \textbf{Texthawk2}~(\citeyear{yu2024texthawk2}) & preprint & QA, OCR, REC & V & SigLIP-SO400M & Qwen2-7B-Instruct & - & - & - \\
+  \textbf{Leopard}~(\citeyear{jia2024leopard}) & TMLR & QA & V & SigLIP-SO400M & Multiple & CoT & - & - \\
+  \textbf{mPLUG-DocOwl2}~(\citeyear{hu2025mplug}) & ACL & QA, KIE & V & ViT & mPLUG-Owl2 & - & - & - \\
+  \textbf{DocR1}~(\citeyear{xiong2026docr1}) & AAAI & QA & V & Qwen2.5-VL & Qwen2.5-VL-7B & CoT & - & - \\
+  \textbf{Docopilot}~(\citeyear{duan2025docopilot}) & CVPR & QA, KIE, DC & V & InternViT-300M & Multiple & - & - & - \\
 
 \bottomrule
 \end{tabular}

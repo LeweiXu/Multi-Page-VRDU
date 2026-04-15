@@ -2,19 +2,23 @@
 """
 pdf_to_markdown.py
 
-Converts all PDF files in a directory to Markdown format.
-Output files are saved to a separate folder, named after the document
-title extracted from the first heading (# or ##) in the converted text.
+Converts either a single PDF file or all PDF files in a directory to
+Markdown format. Output files are named after the document title extracted
+from the first heading (# or ##) in the converted text.
+
+For directory input, output files are saved to a separate folder.
+For single-file input, the output markdown file is saved beside the source
+PDF.
 
 Uses pymupdf4llm for clean text extraction with simple heading formatting.
 Tables and figures are not converted — only text and headings are preserved.
 
 Usage:
-    python pdf_to_markdown.py <input_dir> [output_dir]
+    python pdf_to_markdown.py <input_path> [output_dir]
 
-    input_dir   — folder containing PDF files
-    output_dir  — (optional) folder for markdown output; defaults to
-                  <input_dir>/markdown_output
+    input_path  — PDF file or folder containing PDF files
+    output_dir  — (optional) folder for markdown output when input_path is a
+                  directory; defaults to <input_path>/markdown_output
 
 Dependencies:
     pip install pymupdf4llm
@@ -52,12 +56,30 @@ def sanitise_filename(name: str) -> str:
     return name[:200] if name else "untitled"
 
 
+def convert_pdf(pdf_path: Path, output_dir: Path) -> None:
+    """
+    Convert a single PDF file to a Markdown file in output_dir.
+    """
+    import pymupdf4llm
+
+    print(f"  Converting: {pdf_path.name}")
+
+    markdown_text = pymupdf4llm.to_markdown(
+        str(pdf_path),
+        show_progress=False,
+    )
+
+    title = extract_title(markdown_text, fallback=pdf_path.stem)
+    output_path = output_dir / f"{title}.md"
+    output_path.write_text(markdown_text, encoding="utf-8")
+
+    print(f"    -> Saved as: {output_path.name}")
+
+
 def convert_pdfs(input_dir: Path, output_dir: Path) -> None:
     """
     Convert all PDFs in input_dir to Markdown files in output_dir.
     """
-    import pymupdf4llm
-
     pdf_files = sorted(input_dir.glob("*.pdf"))
 
     if not pdf_files:
@@ -72,23 +94,12 @@ def convert_pdfs(input_dir: Path, output_dir: Path) -> None:
     fail_count = 0
 
     for pdf_path in pdf_files:
-        print(f"  Converting: {pdf_path.name}")
         try:
-            markdown_text = pymupdf4llm.to_markdown(
-                str(pdf_path),
-                show_progress=False,
-            )
-
-            title = extract_title(markdown_text, fallback=pdf_path.stem)
-
-            output_path = output_dir / f"{title}.md"
-            
-            output_path.write_text(markdown_text, encoding="utf-8")
-            print(f"    → Saved as: {output_path.name}")
+            convert_pdf(pdf_path, output_dir)
             success_count += 1
 
         except Exception as e:
-            print(f"    ✗ Failed: {e}")
+            print(f"    x Failed: {e}")
             fail_count += 1
 
     print(f"\nDone. {success_count} converted, {fail_count} failed.")
@@ -97,37 +108,55 @@ def convert_pdfs(input_dir: Path, output_dir: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Convert all PDFs in a directory to Markdown files."
+        description="Convert a PDF file or a directory of PDFs to Markdown files."
     )
     parser.add_argument(
-        "input_dir",
+        "input_path",
         type=Path,
-        help="Directory containing PDF files.",
+        help="PDF file or directory containing PDF files.",
     )
     parser.add_argument(
         "output_dir",
         type=Path,
         nargs="?",
         default=None,
-        help="Directory for output Markdown files (default: <input_dir>/markdown_output).",
+        help="Directory for output Markdown files when input_path is a directory (default: <input_path>/markdown_output).",
     )
     args = parser.parse_args()
 
-    input_dir: Path = args.input_dir.resolve()
-    if not input_dir.exists():
-        print(f"Error: input directory '{input_dir}' does not exist.")
+    input_path: Path = args.input_path.resolve()
+    if not input_path.exists():
+        print(f"Error: input path '{input_path}' does not exist.")
         sys.exit(1)
-    if not input_dir.is_dir():
-        print(f"Error: '{input_dir}' is not a directory.")
+
+    if input_path.is_file():
+        if input_path.suffix.lower() != ".pdf":
+            print(f"Error: '{input_path}' is not a PDF file.")
+            sys.exit(1)
+
+        if args.output_dir is not None:
+            print("Warning: output_dir is ignored when input_path is a single PDF file.")
+
+        output_dir = input_path.parent
+        try:
+            convert_pdf(input_path, output_dir)
+            print(f"Output folder: {output_dir.resolve()}")
+        except Exception as e:
+            print(f"Failed to convert '{input_path.name}': {e}")
+            sys.exit(1)
+        return
+
+    if not input_path.is_dir():
+        print(f"Error: '{input_path}' is neither a PDF file nor a directory.")
         sys.exit(1)
 
     output_dir: Path = (
         args.output_dir.resolve()
         if args.output_dir
-        else input_dir / "markdown_output"
+        else input_path / "markdown_output"
     )
 
-    convert_pdfs(input_dir, output_dir)
+    convert_pdfs(input_path, output_dir)
 
 
 if __name__ == "__main__":
