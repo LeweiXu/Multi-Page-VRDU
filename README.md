@@ -1,7 +1,7 @@
 # Multi-Page Visually Rich Document Understanding
 
 This repo contains various documents and code for my Honours project. Project Proposal available here:
-https://leweixu.github.io/portfolio/
+https://www.overleaf.com/read/ntdnhjhxkgqt#386d92
 
 ## Progress
 
@@ -18,7 +18,8 @@ https://leweixu.github.io/portfolio/
 
 ## Folders
 
-- `dependencies_app`: a web application to help visualise background/backbone works for general LLM/MLLMs and MP-VRDU. Available [here](https://leweixu.github.io/Multi-Page-VRDU/). Note that the information is just a visualisation, and may not be entirely accurate.
+- `dependencies_app`: a web application to help visualise background/backbone works for general LLM/MLLMs and MP-VRDU. Available [here](https://leweixu.github.io/MP-VRDU/). Note that the information is just a visualisation, and may not be entirely accurate.
 - `models_main`: contains the articles/papers for multi-page VRDU, as well as .md counterparts to plug in to LLMs.
+- `datasets_main`: contains the articles/papers for multi-page VRDU datasets, as well as .md conterparts to plug in to LLMs.
 - `seminar`: contains seminar documents.
 - `survey_paper`: contains code/documents for the survey paper / literature review.
