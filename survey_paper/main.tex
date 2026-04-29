@@ -40,7 +40,6 @@
 \usepackage{adjustbox}   % for \begin{adjustbox}
 \usepackage{natbib}      % for \citeyear  (or use biblatex)
 \usepackage{lscape}      % optional: landscape
-\usepackage{float}
 
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
@@ -48,7 +47,7 @@
 %
 % and set <dim> to something 5cm or larger.
 
-\title{Instructions for *ACL Proceedings}
+\title{A Survey on the Evolving Frontier of Multi-Page Visually Rich Document Understanding: Architectures, Trends, Methods, and Challenges}
 
 % Author information can be set in various styles:
 % For several authors from the same institution:
@@ -122,7 +121,6 @@
 
 \section{Introduction}
 
-Needs citations.
 \begin{itemize}
     \item Documents are the primary medium through which organisations record and communicate information, with many critical real-world document types such as contracts, financial reports, scientific papers, technical manuals, textbooks, inherently spanning multiple pages and containing interleaved text, tables, figures and complex layouts \cite{tito2023hierarchical, borchmann2025arctic}
     \item Manually extracting information is time-consuming, expensive, and prone to human error; development of automated DocVQA systems that can answer natural-language queries over document images aims to solve this
@@ -136,45 +134,102 @@ Needs citations.
 \end{itemize}
 
 \section{Framework Architecture Overview}
-Multi-page visually rich document understanding (MP-VRDU) systems can be compared along two related dimensions. The first is how they use recognised text: some systems rely on external OCR or PDF parsing as a primary input, while others read directly from document images using a vision-language backbone. The second is the document-level architecture used to control the growth in pages, tokens, and evidence locations. Table~\ref{tab:model_survey_arch} summarises the surveyed systems along these dimensions, including backbone, vision encoder, modality, prompting, retrieval, and agentic strategy.
+Multi-page VRDU frameworks can be compared along two related axes:
+\begin{enumerate}
+    \item OCR Usage: some frameworks rely on on external or localised OCR or PDF parsing as a primary input, while others read directly from document images using vision-language backbone.
+    \item Document-level Architecture: all multi-page frameworks apply document-level architecture to control the growth in pages, tokens and evidence locations in long documents.
+\end{enumerate}
+Table~\ref{tab:model_survey_arch} summarises the surveyed frameworks along these axes.
 
-\input{models_table}
+\input{latex/models_summary_arch}
 
-\subsection{OCR Use}
+% Note sure whether to write "framework", "model" or "System"
+\subsection{OCR Dependency}
+The distinction between OCR-dependent and OCR-free document models was clearer in earlier VRDU works, where models either consumed OCR tokens and layout boxes or attempted end-to-end image-based reading \cite{huang2022layoutlmv3, ding2025survey}. In MP-VRDU, this binary taxonomy is less stable. Many models use OCR as one component inside a larger multimodal architecture rather than as the sole source of document evidence. OCR may provide sparse lexical retrival, page grounding, bounding-box references, or text snippets for verification, while images remain available for visual reasoning \cite{han2025mdocagent, zhu2025simple, wang2025vidorag}.
 
-The distinction between OCR-dependent and OCR-free document models was clearer in earlier VRDU work, where systems either consumed OCR tokens and layout boxes or attempted end-to-end image-based reading \cite{kim2021donut, huang2022layoutlmv3, ding2025survey}. In MP-VRDU, this binary taxonomy is less stable. Many recent systems use OCR as one component inside a larger multimodal architecture rather than as the sole source of document evidence. OCR may provide sparse lexical retrieval, page grounding, bounding-box references, or text snippets for verification, while page images remain available for visual reasoning \cite{han2025mdocagent, sun2025docagent, jain2025simpledoc, wang2025vidorag}.
+\paragraph{OCR Frameworks.}
+OCR remains useful as structured text and layout coordinates give a compact signal for text-heavy or low-resolution pages. Layout-aware models such as LayTokenLLM \cite{zhu2025simple} show that OCR tokens, bounding boxes, and layout cues can be projected into a language-model space for efficient document reasoning, reducing the need to encode every page at high visual resolution. This however exposes the pipeline to OCR error propagation and parser failures \cite{liao2025doclayllm}. In multi-page settings, OCR-based models require retrieval, compression, or aggregation mechanisms \cite{hannan2025docslm, zhang2024cream}.
 
-OCR remains useful because structured text and layout coordinates give a compact signal for text-heavy pages. Layout-aware models such as DocLLM and LayTokenLLM show that OCR tokens, bounding boxes, and layout cues can be projected into language-model space for efficient document reasoning \cite{wang2024docllm, zhu2025simple}. This reduces the need to encode every page at high visual resolution, but it also exposes the pipeline to OCR errors and parser failures \cite{liao2025doclayllm}. In multi-page settings, OCR token counts still grow with document length, so OCR-based systems require retrieval, compression, or aggregation mechanisms.
+% \begin{itemize}
+%     \item OCR-dependent frameworks extract text and often layout information via bounding-box coordinates using an OCR Engine or PDF parser. These tools can either be off the shelf or localised (self train transformer to perform OCR, often using SFT OCR objective).
+%     \item The principle advantage is that clean, structured text provides a strong signal for reasoning at low image resolution, effectively reducing the reliance on high resolution document images 
+%     \item Some frameworks \cite{zhu2025simple, wang2024docllm} perform inference purely on OCR-extracted information, yielding strong performance on text-heavy documents but lacking reasoning capabilities over complex visual elements.
+%     \item As a result, a common architecture feeds OCR output, including the OCR text, 2D bounding-box coordinates, and low-resolution images patches, into a pre-trained document encoder \cite{huang2022layoutlmv3, appalaraju2024docformerv2}.
+%     \item The fused representation is projected into an LLM's input space via an MLP or cross-attention adaptor. \cite{zhu2025simple}
+%     \item This enables clean structured text to be extracted even from low-resolution scans, reducing the visual resolution required by the vision encoder, but is fundamentally limited by OCR error propagation \cite{wang2024docllm, liao2025doclayllm}.
+%     \item In the multi-page setting, the primary challenge is that the OCR token count grows linearly with the number of pages, rapidly saturating the LLM context window.
+%     \item multi-page OCR-dependent frameworks therefore require additional mechanisms for token reduction or cross-page information aggregation.
+%     \item Due to the complexity of multi-page VRDU, OCR is often just one component of the overall architecture, and many models \cite{han2025mdocagent, jain2025simpledoc, wang2025vidorag} are not dependent on OCR, but use OCR for grounding and/or improving retrieval/agentic performance.
+% \end{itemize}
 
-OCR-free systems instead encode document images directly and learn text recognition through visual-language pre-training \cite{kim2021donut, lee2023pix2struct, hu2024mplug}. This preserves typography, spatial arrangement, figures, tables, and other visual details that OCR may discard. However, accurate image-based reading requires high-resolution visual tokens, and this cost grows rapidly across pages \cite{hu2025mplug, hannan2025docslm}. Recent models therefore combine dynamic resolution, visual token compression, sparse sampling, or iterative navigation to keep multi-page inference tractable \cite{yu2024texthawk2, xie2024wukong, zheng2026doc}.
+\paragraph{OCR-Free Frameworks.}
+OCR-free models encode document images directly and learn text recognition through visual-language pre-training \cite{lee2023pix2struct, hu2024mplug}. This preserves typography, spatial arrangement, figures, tables, and other visual details that OCR may discard. However, accurate image-based reading requires high-resolution document images, the cost of which grows rapidly as the number of pages scale upwards. Multi-page OCR-free frameworks therefore combine dynamic resolution, visual token compression, sparse sampling or iterative navigation to keep multi-page inference tractable \cite{yu2024texthawk2, zheng2026doc}.
 
-\subsection{Multi-Page VRDU Approaches}
+% \begin{itemize}
+%     \item OCR-free frameworks bypass text extraction by directly consuming high-resolution document images through a vision encoder.
+%     \item Text recognition is instead learned through large-scale pre-training on document image–text pairs \cite{kim2021donut, radford2021learning, lee2023pix2struct}.
+%     \item This enables end-to-end differentiability and more naturally preserves visual layout properties (font style, colour, spatial arrangement) that OCR struggles with or discards.
+%     \item However, for accurate text recognition to be possible, a large number of visual tokens are produced for high-resolution input, which is manageable in single-page settings, becomes increasingly expensive when scaling to the multi-page setting. \cite{hu2025mplug}
+%     \item effective text recognition also requires substantial pre-training on document specific tasks such as image captioning and masked image modelling, imposing significant datase and compute requirements. \cite{radford2021learning, li2022dit}
+%     \item Representative single-page models include mPLUG-docOWL1.5 \cite{hu2024mplug} and Qwen2.5-VL \cite{bai2025qwen2} which combine dynamic resolution cropping with token compression modules to reduce per-image token conuts
+%     \item In the multi-page setting, visual token count increases as document length increases as visual tokens are typically far more numerous than OCR text tokens for the same document length, making the context window problem significantly harder in OCR-free pipelines \cite{hannan2025docslm}
+%     \item OCR-free multi-page frameworks need dedicated strategies for compression, retrieval or iterative document navigation to be feasible.
+% \end{itemize}
 
-The multi-page setting introduces two pressures that are less severe in single-page VRDU. First, text tokens, visual tokens, or both often grow with the number of pages. Even when a model nominally supports long contexts, performance can degrade before the context limit is reached because relevant evidence becomes diluted in long sequences \cite{liu2024lost}. Second, answers may require evidence scattered across several pages, such as definitions in one section, values in a table, and qualifications in a later note. MP-VRDU systems must therefore retrieve, compress, aggregate, or revisit evidence while also supporting evidence localisation for explainability \cite{tito2023hierarchical, blau2024gram, deng2025longdocurl}.
+% Not sure if need to cite here.
+\subsection{Multi-Page VRDU Architectures and Trends}
+Architectural progress in MP-VRDU has broadly evolved from direct extension of single-page document models towards increasingly selective and iterative document-level systems. Early work focused on adapting single-page transformer based document encoders to multi-page inputs. Later approaches moved towards backbone-centric MLLMs trained or tuned for multi-page reasoning. As document length remained a persistent constraint, retrieval-augmented methods became more prominent. More recent models increasingly adopt agentic workflows, where document understanding is framed as an iterative process of evidence seeking, reasoning, and refinement.
+% \begin{itemize}
+%     % Lewei Note: info here somewhat overlaps with introduction, could use improvement
+%     \item In the multi-page setting, frameworks must additionally address two interrelated problems:
+%     \item 1. Token count can scale linearly (for frameworks that use vision encoder) as document length increases, rapidly saturating the LLM context window; performance also degrades well before the context window is saturated, as a result of attention dilution \cite{liu2024lost}.
+%     \item 2. Evidence required to answer a question is often scattered across pages, requiring explicit cross-page information flow. Another consideration is explainability, not only do models need to find evidence scattered cross multiple pages, they also need to explicitly locate the evidence.
+% \end{itemize}
 
-Architectural progress in MP-VRDU has followed these pressures. Early systems commonly extended single-page document transformers to multiple pages through hierarchical aggregation, global tokens, sparse attention, or recurrent memory \cite{tito2023hierarchical, blau2024gram, dong2024multi}. Later work shifted toward backbone-centric MLLMs trained or adapted end-to-end for multi-page inputs, but these models remained sensitive to document length and visual-token budget \cite{jia2024leopard, hu2025mplug, hannan2025docslm}. Retrieval-augmented architectures then became a natural response to the context-window bottleneck, while recent work increasingly uses agentic pipelines that iteratively search, inspect, reason, and revise intermediate answers \cite{cho2024m3docrag, tanaka2025vdocrag, han2025mdocagent, wang2025vidorag, zheng2026doc}.
+\paragraph{Hierarchical and Document-Structured Transformer.}
+This family of architectures represents an early trend in MP-VRDU: imposing an explicit page-to-document reasoning structure on top of single-page document models. They usually begin from a single-page document transformer or encoder-decoder and scale to the multi-page setting by encoding pages separately, then aggregating information through page summary tokens \cite{tito2023hierarchical}, document global tokens and local-global attention \cite{blau2024gram}, sparse attention \cite{borchmann2025arctic}, or recurrent memory \cite{dong2024multi}. The main strength of this family is that it preserves page structure while allowing document-level interaction inside the model, making it more principled than concatenating all pages into one flat sequence. However, these models process all or most pages jointly, so memory and computation continue to increase with document length. They improve corss-page reasoning, but very long documents still require additional sparsity, compression, or retrieval.
+% note: could expand more on model specifics but keep short for now.
 
-\paragraph{Hierarchical and Document-Structured Transformers}
-Hierarchical architectures impose an explicit page-to-document reasoning structure. They usually begin from a single-page document transformer or encoder-decoder and scale it to multiple pages by encoding pages separately, then aggregating information through page summary tokens, document-global tokens, local-global attention, sparse attention, or recurrent memory. Hi-VT5 extends a single-page document encoder into a hierarchical encoder-decoder for MultiPage DocVQA, while GRAM introduces global reasoning tokens for cross-page interaction \cite{tito2023hierarchical, blau2024gram}. RM-T5 carries recurrent memory across pages, and Arctic-TILT uses sparse long-context processing with multimodal fusion for business documents \cite{dong2024multi, borchmann2025arctic}.
+% \begin{itemize}
+%     \item This family of approaches introduces an explicit page-to-document reasoning structure, typically by encoding each page separately and then aggregating information through page summary tokens, document-global tokens, local-global attention, or recurrent memory.
+%     \item The appeal is that strong single-page document backbones can be extended to the multi-page setting in a principled way, while preserving page structure and enabling cross-page interactions inside the model itself.
+%     \item Compared with naive page concatenation, these architectures are better suited to cross-page reasoning, but they still process all or most pages jointly, so computation and memory usage continue to grow with document length.
+%     \item In practice, they improve multi-page reasoning without fully removing the long-context bottleneck; very long documents remain difficult unless additional sparsity or compression is introduced.
+%     \item Representative models include Hi-VT5 \cite{tito2023hierarchical}, GRAM \cite{blau2024gram}, RM-T5, and Arctic-TILT.
+% \end{itemize}
 
-The main strength of this family is that it preserves page structure while allowing document-level interaction inside the model. It is more principled than concatenating all pages into one flat sequence. However, these systems still process all or most pages jointly, so memory and computation continue to increase with document length. They improve cross-page reasoning, but very long documents still require additional sparsity, compression, or retrieval.
+\paragraph{Backbone-Centric MLLM Adaptation.}
+Backbone-centric models represent a second trend: training or adapting a pre-trained LLM or MLLM to handle multi-page documents more directly, without adding a separate retrieval pipeline. They use mechanisms such as projectors, adapters, layout tokens, long-context tuning, reinforcement learning, streaming inference, or visual token compression to handle multi-page documents. This design allows the reuse of instruction following and multimodal reasoning ability of strong foundation models while making only target changes to the document understanding task. Some models \cite{jia2024leopard, tanaka2024instructdoc} rely on multi-page instruction tuning and the backbone context window to absorb page representations. Others \cite{hu2024mplug, hannan2025docslm, yu2024texthawk2} make compression or long-document reading central to the architecture. Recent work further adapts multimodal backbones toward document-level reasoning and evidence-guided learning \cite{duan2025docopilot, xiong2026docr1}. The limitation of this trend is that the backbone must still retain document-scale evidence internally, making performance sensitive to context length, compression quality and fine-grained text preservation.
+ 
+% \begin{itemize}
+%     \item This family adapts a pretrained LLM or MLLM backbone to multi-page documents through projectors, adapters, layout tokens, long-context tuning, reinforcement learning, streaming mechanisms, or visual compression modules, without introducing a separate document-level retrieval pipeline.
+%     \item The appeal is that a capable foundation model can be reused directly, often with relatively modest architectural changes, while inheriting strong multimodal or instruction-following ability.
+%     \item Some models rely mainly on multi-image instruction tuning and the backbone context window to absorb concatenated page representations, while others introduce native compression modules so that more pages can remain in context simultaneously.
+%     \item The core limitation is that the backbone must still absorb document-scale evidence internally, so performance depends heavily on context length, compression quality, and the model's ability to retain fine-grained textual and layout detail.
+%     \item Representative models include Leopard \cite{jia2024leopard}, InstructDoc \cite{tanaka2024instructdoc}, mPLUG-DocOwl2 \cite{hu2025mplug}, DocSLM \cite{hannan2025docslm}, Docopilot, and TextHawk2.
+% \end{itemize}
 
-\paragraph{Backbone-Centric Multimodal Adaptation}
-Backbone-centric approaches represent a second trend: training or adapting a pretrained LLM or MLLM to handle multi-page documents more directly, without adding a separate retrieval pipeline. They use mechanisms such as projectors, adapters, layout tokens, long-context tuning, reinforcement learning, streaming inference, or visual token compression. This design reuses the instruction-following and multimodal reasoning ability of strong foundation models while making only targeted changes to the document interface.
+\paragraph{Retriever-Generator.}
+Retriever-Generator (RAG) models represent a third trend: using retrieval to reduce the amount of document evidence passed to the generator, decomposing MP-VRDU into evidence selection followed by answer generation. These systems first retrieve relevant pages, patches, chunks, visual elements, OCR passages or graph nodes, then generate an answer from the selected evidence. Retrieval may be performed through course-to-fine selection \cite{zhang2024cream}, adaptive visual retrieval \cite{li2025avir}, multimodal dense retrieval \cite{cho2024m3docrag, tanaka2025vdocrag}, sparse sampling \cite{xie2024wukong}, graph-based prompting \cite{wang2024knowledge}, or logic-aware retrieval \cite{wu2025molorag}. The main limitation of this architecture is the retrieval bottleneck. If the correct evidence is missed, the generator often cannot recover, regardless of its reasoning capability. 
 
-Some models rely on multi-image instruction tuning and the backbone context window to absorb page representations, as in Leopard and InstructDoc \cite{jia2024leopard, tanaka2024instructdoc}. Others make compression or long-document reading central to the architecture. mPLUG-DocOwl2 compresses high-resolution document images for OCR-free multi-page understanding, DocSLM targets long multimodal documents with a small VLM, and TextHawk2 emphasises efficient high-resolution OCR and grounding ability \cite{hu2025mplug, hannan2025docslm, yu2024texthawk2}. Docopilot and DocR1 further adapt multimodal backbones toward document-level reasoning and evidence-guided learning \cite{duan2025docopilot, xiong2026docr1}. The limitation is that the backbone must still retain document-scale evidence internally, making performance sensitive to context length, compression quality, and fine-grained text preservation.
+% \begin{itemize}
+%     \item Retrieve-then-generate frameworks decompose multi-page VRDU into an evidence selection stage followed by answer generation conditioned only on the selected pages, patches, chunks, diagrams, or graph nodes.
+%     \item This sidesteps the token-scaling problem by making inference depend on the amount of retrieved evidence rather than the full document length.
+%     \item The main drawback is the retrieval bottleneck: if the correct evidence page or passage is not retrieved, the generator will usually fail regardless of how strong the downstream MLLM or LLM is \cite{cho2024m3docrag, tanaka2025vdocrag, li2025avir}.
+%     \item These systems can retrieve over OCR text, page images, multimodal chunks, or structured indexes such as graphs, and some models blur the boundary with native MLLMs by training the retriever or sampler end-to-end with the generator.
+%     \item Representative models include CREAM \cite{zhang2024cream}, KGP \cite{wang2024knowledge}, AVIR \cite{li2025avir}, M3DocRAG \cite{cho2024m3docrag}, VDocRAG \cite{tanaka2025vdocrag}, and PDF-WuKong.
+% \end{itemize}
 
-\paragraph{Retriever-Generator Architectures}
-Retriever-generator systems decompose MP-VRDU into evidence selection followed by answer generation. Instead of passing the full document to the generator, they retrieve relevant pages, patches, chunks, diagrams, OCR passages, or graph nodes. This makes inference depend on the amount of selected evidence rather than the full document length.
+\paragraph{Agentic Pipeline.}
+Agentic pipelines represent the most recent trend: replacing fixed retrieve-then-generate workflows with iterative evidence seeking, reasoning and refinement. In this survey, we use this category for models with multi-agent decomposition and/or open-ended iterative control, rather than fixed RAG pipelines. These systems may distribute retrieval, visual inspection, modal fusion, judgement and answer synthesis across specialised agents \cite{han2025mdocagent, duan2025m2rag, yu2025visual}, or use tool-augment and dynamic iterative workflows to navigate documents, inspect evidence, maintain intermediate states, and revise answers \cite{sun2025docagent, zhu2025doclens, zheng2026doc, wang2025vidorag}. These models reduce single-shot retrieval failures and improve question answering accuracy, but introduce higher inference cost, latency and pipeline complexity.
 
-The trade-off is a retrieval bottleneck. If the correct page or evidence unit is missed, the generator often cannot recover, regardless of its reasoning ability. CREAM uses coarse-to-fine retrieval and efficient multimodal tuning for DocVQA, while AVIR performs adaptive visual in-document retrieval for multi-page question answering \cite{zhang2024cream, li2025avir}. M3DocRAG and VDocRAG retrieve over multimodal document representations, and PDF-WuKong uses sparse sampling over long PDFs to select useful text and visual evidence \cite{cho2024m3docrag, tanaka2025vdocrag, xie2024wukong}. Other systems incorporate structured or graph-based retrieval, such as knowledge graph prompting and logic-aware retrieval \cite{wang2024knowledge, wu2025molorag}. These methods directly address document length, but they shift much of the difficulty to evidence indexing and recall.
-
-The boundary between retrieval and agentic reasoning is not always sharp. A fixed RAG pipeline can be viewed as a simple, single-pass agent: it retrieves evidence once and then generates an answer. In this survey, however, we reserve ``agentic pipeline'' for systems with multi-agent decomposition and/or open-ended iterative control, rather than fixed retrieve-then-generate workflows.
-
-\paragraph{Agentic Pipeline Architectures}
-Agentic systems are the most recent architectural trend, especially in late-2025 and 2026 work. They make evidence acquisition and reasoning iterative rather than fixed in a single retrieve-then-generate pass. A controller LLM or VLM decides what to inspect next based on intermediate observations. This supports query reformulation, page navigation, crop selection, tool use, answer verification, reflection, and multi-hop evidence gathering.
-
-This architecture is well matched to MP-VRDU because relevant evidence is often distributed across pages and modalities. Unlike standard RAG, agentic systems may generate intermediate answers, critique them, update memory, and continue searching before producing a final response. MDocAgent combines text and image retrieval with specialised agents for critical evidence extraction and summarisation \cite{han2025mdocagent}. DocAgent and DocLens use tool-augmented workflows for long-context document navigation and evidence localisation \cite{sun2025docagent, zhu2025doclens}. Doc-V* performs coarse-to-fine visual reasoning with visual working memory, while ViDoRAG uses dynamic iterative reasoning agents for visual document RAG \cite{zheng2026doc, wang2025vidorag}. Multi-agent variants such as M2RAG and MACT distribute subtasks across retrieval, visual inspection, fusion, judgment, and answer synthesis \cite{duan2025m2rag, yu2025visual}. These systems can reduce the single-shot retrieval failure mode, but they increase inference cost, latency, and engineering complexity.
+% \begin{itemize}
+%     \item Agentic frameworks extend retrieval-based reasoning by making evidence acquisition iterative and decision-driven rather than fixed in a single retrieve-then-generate pass.
+%     \item A controller LLM or VLM decides what to inspect next based on intermediate observations, enabling query reformulation, page navigation, crop selection, verification, reflection, and multi-hop evidence gathering.
+%     \item This can mitigate the single-shot retrieval bottleneck and is especially useful when evidence is distributed across multiple pages or modalities, but it increases inference cost, latency, and pipeline complexity.
+%     \item Multi-agent variants further distribute work across specialized roles, such as text retrieval, visual retrieval, critical evidence extraction, answer synthesis, and adjudication, reducing the burden on any single model.
+%     \item Representative models include MDocAgent \cite{han2025mdocagent}, DocAgent, DocLens, Doc-V*, M2RAG, ViDoRAG, and MACT.
+% \end{itemize}
 
 \section{Multimodal Information Modelling}
 
@@ -342,6 +397,6 @@ Given a query, split taslk into multiple roles such as planner, retriever, judge
 \section{Example Appendix}
 \label{sec:appendix}
 
-This is an appendix.
+\include{latex/models_summary_ocr}
 
 \end{document}

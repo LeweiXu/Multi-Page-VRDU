@@ -1,7 +1,7 @@
 ID,Name,OCR,Architecture,Bibtex,Venue,Prompting Strategy,RAG Strategy,Agentic Strategy,Modality,Vision Encoder,LLM Backbone
 1,Arctic-TILT,Yes,Hierarchical Document Transformer,borchmann2025arctic,ACL,-,-,-,"T, V, L",U-Net,T5-Large
 2,AVIR,No,Retriever-Generator,li2025avir,ACM,-,Dense,-,V,Pix2Struct,Qwen2.5-VL-3B-AWQ
-3,CoR,Yes*,Backbone-Centric MLLM Adaptation,guo2026end,preprint,CoT,-,-,"T, V, L",Qwen2.5-VL,Qwen2.5-VL-7B
+3,CoR,Yes*,Backbone-Centric MLLM Adaptation,guo2026end,preprint,CoT,-,-,V,Qwen2.5-VL,Qwen2.5-VL-7B
 4,CREAM,Yes,Retriever-Generator,zhang2024cream,ACM,-,Joint,-,"T, V",Pix2Struct,LLaMA2-7B
 5,DFVC,No,Retriever-Generator,qian2026accurate,MDPI,-,Dense,-,V,"VisRAG, ColQwen",Qwen2-VL-2B-Instruct
 6,Doc-V*,No,Agentic Pipeline,zheng2026doc,preprint,ReAct,Dense,Open,V,ColQwen,Qwen2.5-VL-7B-Instruct
@@ -15,23 +15,23 @@ ID,Name,OCR,Architecture,Bibtex,Venue,Prompting Strategy,RAG Strategy,Agentic St
 14,GRAM,Yes,Hierarchical Document Transformer,blau2024gram,CVPR,-,-,-,"T, V, L",DocFormerv2,DocFormerv2
 15,Hi-VT5,Yes,Hierarchical Document Transformer,tito2023hierarchical,PR,-,-,-,"T, V, L",DiT,T5-Base
 16,InstructDr,Yes,Backbone-Centric MLLM Adaptation,tanaka2024instructdoc,AAAI,-,-,-,"T, V, L",CLIP,"FlanT5, BLIP2"
-17,KGP,No,Retriever-Generator,wang2024knowledge,AAAI,-,Sparse,Fixed,"T, L",-,Multiple
+17,KGP,No,Agentic Pipeline,wang2024knowledge,AAAI,-,Sparse,Fixed,"T, L",-,Multiple
 18,LayTokenLLM,Yes,Backbone-Centric MLLM Adaptation,zhu2025simple,CVPR,-,-,-,"T, L",-,"LLaMA3-8B, Qwen1.5-7B"
 19,Leopard,No,Backbone-Centric MLLM Adaptation,jia2024leopard,TMLR?,CoT,-,-,V,SigLIP-SO400M,"LLaMa-3.1-8B, Mistral-7B"
-20,M2RAG,Yes*,Agentic Pipeline,duan2025m2rag,NeurIPS,CoT,Joint,Fixed,"T, V",VisRAG-Ret,Multiple (Qwen)
+20,M2RAG,Yes*,Agentic Pipeline,duan2025m2rag,NeurIPS,-,Joint,Fixed,"T, V",VisRAG-Ret,Multiple (Qwen)
 21,M3DocRAG,No,Retriever-Generator,cho2024m3docrag,preprint,-,Dense,-,V,"ColPali, ColQwen",Multiple (Qwen/Intern/Idefics)
-22,MACT,No,Agentic Pipeline,yu2025visual,preprint,CoT,-,Open ,"T, V",Multiple,Multiple (Qwen/Intern)
-23,MDocAgent,Yes*,Agentic Pipeline,han2025mdocagent,preprint,-,Dense,Fixed,"T, V","ColPali, ColQwen2",Multiple (Llama/Qwen)
+22,MACT,No,Agentic Pipeline,yu2025visual,preprint,CoT,Dense,Open ,"T, V",Multiple,Multiple (Qwen/Intern)
+23,MDocAgent,Yes*,Agentic Pipeline,han2025mdocagent,preprint,-,Joint,Fixed,"T, V","ColPali, ColQwen2",Multiple (Llama/Qwen)
 24,MHier-RAG,Yes,Retriever-Generator,gong2025mhier,preprint,CoT,Joint,-,"T, V, L",Qwen-VL-Plus,Multiple (Qwen/DS/GPT)
 25,MLDocRAG,Yes,Retriever-Generator,zhang2026mldocrag,preprint,CoT,Dense,-,"T, V, L",-,Multiple (Qwen)
 26,MoLoRAG,No,Retriever-Generator,wu2025molorag,EMNLP,-,Dense,-,V,ColPali,Multiple (Qwen/DS/LLaVA)
 27,mPLUG-DocOwl2,No,Backbone-Centric MLLM Adaptation,hu2025mplug,ACL,-,-,-,V,ViT-L/14,mPLUG-Owl2
+28,MultiDocFusion,Yes,Retriever-Generator,shin2025multidocfusion,ACL,-,Dense,-,"T, V, L",-,Multiple (Qwen/LLaMa/Mistral)
 29,PDF-WuKong,Yes*,Retriever-Generator,xie2024wukong,preprint,-,Joint,-,"T, V",IXC2-VL-4KHD,IXC2-VL-4KHD
 30,RAG-DocVQA,Yes*,Retriever-Generator,lopez2025enhancing,ICDAR,-,Dense,-,"T, V, L","DiT, Pix2Struct",Qwen2.5-VL-7B-Instruct
 31,RM-T5,Yes,Hierarchical Document Transformer,dong2024multi,DAS,-,-,-,"T, V, L",DiT,T5-Base
 32,Self-Attention Scoring,No,Retriever-Generator,kang2024multi,ICDAR,-,Dense,-,V,Pix2Struct,Pix2Struct
-33,SimpleDoc,Yes*,Agentic Pipeline,jain2025simpledoc,EMNLP,CoT,Dense,Open,V,ColQwen-2.5,Multiple (Qwen)
+33,SimpleDoc,Yes*,Agentic Pipeline,jain2025simpledoc,EMNLP,CoT,Joint,Open,V,ColQwen-2.5,Multiple (Qwen)
 34,Texthawk2,No*,Backbone-Centric MLLM Adaptation,yu2024texthawk2,preprint,-,-,-,V,SigLIP-SO400M,Qwen2-7B-Instruct
 35,VDocRAG,No*,Retriever-Generator,tanaka2025vdocrag,CVPR,-,Dense,-,V,Phi3V-4.2B,Phi3V-4.2B
 36,ViDoRAG,Yes*,Agentic Pipeline,wang2025vidorag,EMNLP,ReAct,Joint,Open,"T, V","NV-Embed-V2, ColQwen2",Multiple (Qwen/LLaMa/GPT)
-28,MultiDocFusion,Yes,Retriever-Generator,shin2025multidocfusion,ACL,-,Joint,-,"T, V, L",-,Multiple (Qwen/LLaMa/Mistral)
