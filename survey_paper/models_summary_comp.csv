@@ -1,8 +1,8 @@
 ID,Name,OCR,Architecture,Bibtex,Venue,Prompting Strategy,Search Strategy,Agentic Strategy,Modality,Vision Encoder,LLM Backbone
 6,Doc-V*,No,Agentic Pipeline,zheng2026doc,preprint,ReAct,Dense,Open,V,ColQwen,Qwen2.5-VL-7B-Instruct
-7,DocAgent,Yes*,Agentic Pipeline,sun2025docagent,EMNLP,ReAct,Joint,Open,"T, V, L",-,Multiple (GPT/Gemini/Claude)
+7,DocAgent,Yes*,Agentic Pipeline,sun2025docagent,EMNLP,ReAct,Joint,Open,"T, V, L",-,Multiple (Closed-Source)
 8,DocDancer,Yes*,Agentic Pipeline,zhang2026docdancer,preprint,ReAct,Joint,Open,"T, V, L",Qwen3-VL-235B,Qwen3-4B/30B-A3B
-9,DocLens,Yes,Agentic Pipeline,zhu2025doclens,preprint,CoT,Joint,Open,"T, V, L",-,Multiple (GPT/Gemini/Claude)
+9,DocLens,Yes,Agentic Pipeline,zhu2025doclens,preprint,CoT,Joint,Open,"T, V, L",-,Multiple (Closed-Source)
 12,DocReact,No,Agentic Pipeline,wu2025doc,ACL,ReAct,Dense,Open,V,"ColPali, VisRAG",GPT-4o
 17,KGP,No,Agentic Pipeline,wang2024knowledge,AAAI,-,Sparse,Fixed,"T, L",-,Multiple
 20,M2RAG,Yes*,Agentic Pipeline,duan2025m2rag,NeurIPS,-,Joint,Fixed,"T, V",VisRAG-Ret,Multiple (Qwen)
@@ -32,6 +32,6 @@ ID,Name,OCR,Architecture,Bibtex,Venue,Prompting Strategy,Search Strategy,Agentic
 26,MoLoRAG,No,Retriever-Generator,wu2025molorag,EMNLP,-,Dense,-,V,ColPali,Multiple (Qwen/DS/LLaVA)
 28,MultiDocFusion,Yes,Retriever-Generator,shin2025multidocfusion,ACL,-,Dense,-,"T, V, L",-,Multiple (Qwen/LLaMa/Mistral)
 29,PDF-WuKong,Yes*,Retriever-Generator,xie2024wukong,preprint,-,Joint,-,"T, V",IXC2-VL-4KHD,IXC2-VL-4KHD
-30,RAG-DocVQA,Yes*,Retriever-Generator,lopez2025enhancing,ICDAR,-,Dense,-,"T, V, L","DiT, Pix2Struct",Qwen2.5-VL-7B-Instruct
+30,RAG-DocVQA,Yes*,Retriever-Generator,lopez2025enhancing,ICDAR,-,Dense,-,"T, V, L (V, L for OCR-free variant)","DiT, Pix2Struct",Qwen2.5-VL-7B-Instruct
 32,Self-Attention Scoring,No,Retriever-Generator,kang2024multi,ICDAR,-,Dense,-,V,Pix2Struct,Pix2Struct
 35,VDocRAG,No*,Retriever-Generator,tanaka2025vdocrag,CVPR,-,Dense,-,V,Phi3V-4.2B,Phi3V-4.2B

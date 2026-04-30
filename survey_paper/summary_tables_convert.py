@@ -35,12 +35,12 @@ OUTPUT_OCR  = _out_base + "_ocr.tex"
 DISPLAY_NAME_MAP = {
     "Name": "Model",
     "Model": "Model",
-    "Approach": "Architecture",
+    "Architecture": "Architecture",
     "OCR": "OCR",
     "Downstream Tasks": "Tasks",
     "Prompt Strategy": "Prompt",
     "Prompting Strategy": "Prompt",
-    "RAG Strategy": "RAG",
+    "Search Strategy": "Search",
     "Agentic Strategy": "Agentic",
     "Modality": "Mod.",
 }
@@ -49,15 +49,15 @@ COLUMN_SPEC_MAP = {
     "Name": "l",
     "Model": "l",
     "Venue": "l",
-    "Approach": "p{2.6cm}",
+    "Architecture": "l",
     "OCR": "c",
-    "Downstream Tasks": "p{2.8cm}",
+    "Downstream Tasks": "l",
     "Modality": "c",
-    "Vision Encoder": "p{2.8cm}",
-    "LLM Backbone": "p{3.0cm}",
+    "Vision Encoder": "l",
+    "LLM Backbone": "l",
     "Prompt Strategy": "c",
     "Prompting Strategy": "c",
-    "RAG Strategy": "c",
+    "Search Strategy": "c",
     "Agentic Strategy": "c",
 }
 
@@ -69,13 +69,13 @@ PREFERRED_ORDER = [
     "Name",
     "Venue",
     "OCR",
-    "Approach",
+    "Architecture",
     "Vision Encoder",
     "LLM Backbone",
     "Modality",
     "Prompting Strategy",
     "Prompt Strategy",
-    "RAG Strategy",
+    "Search Strategy",
     "Agentic Strategy",
     "Downstream Tasks",
 ]
@@ -93,7 +93,7 @@ OCR_SORT_ORDER = ["No", "No*", "Yes", "Yes*"]
 # Abbreviations for the Architecture column when shown inside the OCR table.
 ARCH_ABBREVS = {
     "Hierarchical Document Transformer": "HDT",
-    "Backbone-Centric MLLM Adaptation":  "BC-MLLM",
+    "Backbone-Centric MLLM Adaptation":  "BC",
     "Retriever-Generator":                "RAG",
     "Agentic Pipeline":                   "AP",
 }
@@ -136,7 +136,7 @@ def make_column_config(df_columns, hidden_cols):
     ordered = [col for col in PREFERRED_ORDER if col in visible]
     ordered.extend(col for col in visible if col not in ordered)
     return [
-        (col, DISPLAY_NAME_MAP.get(col, col), COLUMN_SPEC_MAP.get(col, r"p{2.6cm}"))
+        (col, DISPLAY_NAME_MAP.get(col, col), COLUMN_SPEC_MAP.get(col, "l"))
         for col in ordered
     ]
 
@@ -180,11 +180,11 @@ def make_model_cell(row, model_col, has_asterisk=False):
         name = name + r"$^*$"
     bibtex = str(row["Bibtex"]).strip() if pd.notna(row["Bibtex"]) else ""
     if not bibtex:
-        return rf"\textbf{{{name}}}"
+        return rf"{{{name}}}"
     year = extract_year(bibtex)
     if year:
-        return rf"\textbf{{{name}}}~(\citeyear{{{bibtex}}})"
-    return rf"\textbf{{{name}}}~\cite{{{bibtex}}}"
+        return rf"{{{name}}}~(\citeyear{{{bibtex}}})"
+    return rf"{{{name}}}~\cite{{{bibtex}}}"
 
 
 def build_table_rows(df, columns, model_col, asterisk_col=None, cell_value_maps=None):
@@ -357,16 +357,16 @@ def main():
     arch_caption = (
         r"Survey of VRDU models grouped by architecture category. "
         r"\textbf{Mod.}: input modality (T\,=\,text, V\,=\,visual, L\,=\,layout). "
-        r"\textbf{OCR}: whether the model requires OCR pre-processing "
-        r"(Yes\,=\,required; No\,=\,not required; "
-        r"Yes\textsuperscript{*}\,=\,not strictly OCR-dependent but OCR is used as a framework component; "
-        r"No\textsuperscript{*}\,=\,OCR used during training only, not at inference). "
-        r"\textbf{RAG}: retrieval strategy "
+        r"\textbf{OCR}: OCR used at inference."
+        r"(Yes\,=\,required; No\,=\, not required; "
+        r"Yes\textsuperscript{*}\,=\, not OCR dependent; "
+        r"No\textsuperscript{*}\,=\, OCR-derived training, no OCR at inference. "
+        r"\textbf{Search}: search strategy "
         r"(Dense, Sparse, Joint\,=\,both). "
         r"\textbf{Prompt}: prompting strategy "
         r"(CoT\,=\,Chain of Thought; ReAct\,=\,Reason\,+\,Act). "
         r"\textbf{Agentic}: agentic workflow type "
-        r"(Open\,=\,open-ended tool use; Fixed\,=\,fixed pipeline). "
+        r"(Open\,=\,open-ended iterative; Fixed\,=\,fixed iterative). "
         r"`--' indicates not reported."
     )
     arch_table = build_single_table(
@@ -399,10 +399,10 @@ def main():
             r"but is not required at inference. "
             r"\textbf{Architecture} abbreviations: "
             r"HDT\,=\,Hierarchical Document Transformer; "
-            r"BC-MLLM\,=\,Backbone-Centric MLLM Adaptation; "
-            r"RAG\,=\,Retriever-Generator; AP\,=\,Agentic Pipeline. "
+            r"BC\,=\,Backbone-Centric MLLM Adaptation; "
+            r"Search\,=\,Retriever-Generator; AP\,=\,Agentic Pipeline. "
             r"\textbf{Mod.}: input modality (T\,=\,text, V\,=\,visual, L\,=\,layout). "
-            r"\textbf{RAG Strat.}: retrieval strategy "
+            r"\textbf{Search Strat.}: retrieval strategy "
             r"(Dense, Sparse, Joint\,=\,both). "
             r"\textbf{Prompt Strat.}: prompting strategy "
             r"(CoT\,=\,Chain of Thought; ReAct\,=\,Reason\,+\,Act). "
